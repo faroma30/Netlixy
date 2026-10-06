@@ -3,9 +3,9 @@
  * pathname entry so a GitHub Pages hostname cannot authorize other repositories.
  */
 export const DEV_ACCESS={
-  validationHosts:['localhost','127.0.0.1','::1'],
+  validationHosts:['localhost','127.0.0.1','::1','faroma30.github.io'],
   debugHosts:['localhost','127.0.0.1','::1'],
-  validationPaths:{},
+  validationPaths:{'faroma30.github.io':'/Netlixy/'},
 };
 const normalizeHost=hostname=>String(hostname||'').toLowerCase().replace(/^\[|\]$/g,'').replace(/\.$/,'');
 const LOCAL_HOSTS=new Set(['localhost','127.0.0.1','::1']);
