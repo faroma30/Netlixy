@@ -1,0 +1,35 @@
+name: Publish Netlixy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/configure-pages@v6
+      - name: Package static PWA files
+        run: |
+          mkdir -p Netlixy/dist
+          cp Netlixy/index.html Netlixy/manifest.webmanifest Netlixy/service-worker.js Netlixy/dist/
+          cp -R Netlixy/css Netlixy/src Netlixy/assets Netlixy/vendor Netlixy/dist/
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: Netlixy/dist
+      - id: deployment
+        uses: actions/deploy-pages@v5
