@@ -1,0 +1,6 @@
+# SYNTHETIC — caso deliberado de marcas ambiguas
+Vodafone
+Lowi
+Router documentation
+SSID: CASA_WIFI
+WLAN Key: CasaWifi12345

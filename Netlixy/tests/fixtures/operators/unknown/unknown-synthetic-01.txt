@@ -1,0 +1,4 @@
+# SYNTHETIC — no representa una etiqueta real
+Fiber Router AC1200
+SSID: CASA_WIFI
+WLAN Key: CasaWifi12345

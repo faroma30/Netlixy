@@ -1,0 +1,15 @@
+# Real router-label samples may expose Wi-Fi credentials. Keep raw material local unless reviewed and explicitly redacted.
+tests/fixtures/operators-real/**/input.*
+tests/fixtures/operators-real/**/expected*.json
+tests/fixtures/operators-real/**/ocr*.txt
+tests/fixtures/operators-real/**/diagnostic*.json
+tests/fixtures/operators-real/**/notes.local.md
+
+# Local dependencies, generated deployment output, environment files and private samples.
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.local.*
+**/*.local.*

@@ -1,0 +1,4 @@
+# SYNTHETIC — no representa una etiqueta real
+O2
+Nombre WiFi: O2_TEST
+Clave WiFi: O2Test12345

@@ -1,0 +1,5 @@
+# SYNTHETIC — no representa una etiqueta real
+DIGI
+Admin Password: admin123
+SSID: CASA_TEST
+WLAN Key: RealWifi9876

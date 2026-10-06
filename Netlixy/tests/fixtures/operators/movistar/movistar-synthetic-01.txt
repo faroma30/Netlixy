@@ -1,0 +1,5 @@
+# SYNTHETIC — no representa una etiqueta real
+Movistar
+SSID: MOVISTAR_TEST
+Clave WiFi: MovistarTest123
+WPA2

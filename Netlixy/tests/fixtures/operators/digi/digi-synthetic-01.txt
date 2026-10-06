@@ -1,0 +1,6 @@
+# SYNTHETIC — no representa una etiqueta real
+DIGI
+WiFi
+SSID: DIGIFIBRA-TEST
+WiFi Password: DigiTest12345
+WPA2

@@ -1,0 +1,15 @@
+{
+  "name": "netlixy-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node tests/core.test.mjs && node tests/camera.test.mjs && node tests/ocr.test.mjs && node tests/router-parser.test.mjs && node tests/operator-profiles.test.mjs && node tests/ocr-engine.test.mjs && node tests/lab-diagnostics.test.mjs && node tests/real-fixture-analysis.test.mjs && node tests/validation.test.mjs",
+    "test:ocr-engine": "node tests/ocr-engine.test.mjs",
+    "test:fixture": "node tests/analyze-real-fixture.mjs"
+  },
+  "description": "PWA local para crear y compartir conexiones Wi-Fi mediante códigos QR",
+  "devDependencies": {
+    "tesseract.js": "7.0.0"
+  }
+}

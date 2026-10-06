@@ -1,0 +1,4 @@
+# SYNTHETIC — no representa una etiqueta real
+Orange
+SSID: ORANGE_TEST
+WiFi Key: OrangeTest123
