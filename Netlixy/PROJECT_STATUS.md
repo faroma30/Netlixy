@@ -347,3 +347,30 @@ La aplicación ya está formada por recursos estáticos y no requiere backend. P
 - ⚪ Las 46 pruebas físicas siguen sin probarse.
 
 El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la configuración GitHub previamente usada por el usuario. Para terminar el acceso externo, hace falta iniciar sesión en GitHub en el navegador de trabajo y confirmar que la cuenta correcta está seleccionada. Se creará privado primero; si Pages no está disponible de forma compatible con esa visibilidad, se detendrá antes de exponer el repositorio.
+
+## UI / Restyling (2026-10-07)
+
+- 🟢 Sistema visual oscuro con acento azul eléctrico, tarjetas redondeadas, foco visible y navegación inferior renovada.
+- 🟢 Inicio rediseñado con accesos a escáner, generación manual, Mi red Wi-Fi y vista compacta de redes guardadas con sus notas.
+- 🟢 Formularios rediseñados con campos oscuros y controles táctiles amplios; se conserva la entrada manual y el pegado disponible.
+- 🟢 QR generado rediseñado con código destacado, SSID, seguridad, contraseña según el comportamiento actual y nota identificativa.
+- 🟢 Recientes rediseñado conservando SSID, nota, fecha y acciones existentes.
+- 🟢 Ajustes rediseñados sin añadir preferencias ficticias; muestran privacidad local, borrado existente y versión actual.
+- 🟢 Copiar datos copia SSID, contraseña y seguridad en formato legible; Clipboard API con fallback de selección y confirmación breve.
+- 🟡 Validación visual en iPhone pendiente.
+- 🟡 PWA instalada pendiente de revisar.
+- ⚪ Ajustes finales tras uso real pendientes.
+- ⚪ Ninguna prueba física se marca como realizada.
+## UI / Restyling (2026-10-07)
+
+- 🟢 Sistema visual oscuro con acento azul eléctrico, tarjetas redondeadas, foco visible y navegación inferior renovada.
+- 🟢 Inicio rediseñado con accesos a escáner, generación manual, Mi red Wi-Fi y vista compacta de redes guardadas con sus notas.
+- 🟢 Formularios rediseñados con campos oscuros y controles táctiles amplios; se conserva la entrada manual y el pegado disponible.
+- 🟢 QR generado rediseñado con código destacado, SSID, seguridad, contraseña según el comportamiento actual y nota identificativa.
+- 🟢 Recientes rediseñado conservando SSID, nota, fecha y acciones existentes.
+- 🟢 Ajustes rediseñados sin añadir preferencias ficticias; muestran privacidad local, borrado existente y versión actual.
+- 🟢 Copiar datos copia SSID, contraseña y seguridad en formato legible; Clipboard API con fallback de selección y confirmación breve.
+- 🟡 Validación visual en iPhone pendiente.
+- 🟡 PWA instalada pendiente de revisar.
+- ⚪ Ajustes finales tras uso real pendientes.
+- ⚪ Ninguna prueba física se marca como realizada.
