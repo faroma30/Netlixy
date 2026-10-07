@@ -1,4 +1,4 @@
-name: Publish Netlixy to GitHub Pages
+name: Publish WiFi Connect to GitHub Pages
 
 on:
   push:

@@ -76,7 +76,7 @@ export function buildLabText(diagnostic) {
   const op = diagnostic.operatorDetection?.detected?.name || diagnostic.operatorDetection?.detected?.id || 'No identificado';
   const ssids = diagnostic.parser?.ssidCandidates || [], passwords = diagnostic.parser?.passwordCandidates || [];
   return [
-    'NETLIXY · DIAGNÓSTICO DE ETIQUETA', `Fecha: ${diagnostic.timestamp}`,
+    'WIFI CONNECT · DIAGNÓSTICO DE ETIQUETA', `Fecha: ${diagnostic.timestamp}`,
     `Operador detectado: ${op}`, `Operador correcto: ${diagnostic.expected?.operator || '—'} · coincide: ${mark(c.operator)}`,
     '', 'OCR', diagnostic.ocr?.rawText || '(sin texto)', '',
     `SSID detectado: ${ssids[0]?.value ?? '—'}`, `SSID correcto: ${diagnostic.expected?.ssid || '—'} · coincide: ${mark(c.ssid)}`,

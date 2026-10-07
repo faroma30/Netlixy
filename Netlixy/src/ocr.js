@@ -17,7 +17,7 @@ export function createOcrService({loadEngine=()=>import('../vendor/tesseract/tes
    throwIfAborted(signal);onStage('Preparando imagen');prepared=await preprocess(blob,{signal,onStage});throwIfAborted(signal);
    onStage('Cargando reconocimiento');const loadedEngine=await waitFor(loadEngine(),signal);const engine=loadedEngine?.createWorker?loadedEngine:loadedEngine?.default;throwIfAborted(signal);
    const p=paths();const logger=message=>{if(message?.status){onStage(mapStatus(message.status));}if(Number.isFinite(message?.progress)&&message.progress>=0&&message.progress<=1)onProgress({status:mapStatus(message.status||'Procesando'),progress:message.progress});};
-   workerPromise=engine.createWorker(OCR_LANGUAGES,engine.OEM?.LSTM_ONLY??1,{...p,workerBlobURL:false,gzip:true,cacheMethod:'write',logger,errorHandler:error=>console.error('[Netlixy OCR] Error del worker:',error?.message||error)},{tessedit_pageseg_mode:engine.PSM?.AUTO??'3'});
+   workerPromise=engine.createWorker(OCR_LANGUAGES,engine.OEM?.LSTM_ONLY??1,{...p,workerBlobURL:false,gzip:true,cacheMethod:'write',logger,errorHandler:error=>console.error('[WiFi Connect OCR] Error del worker:',error?.message||error)},{tessedit_pageseg_mode:engine.PSM?.AUTO??'3'});
    // createWorker resolves after worker initialization. If canceled during setup, terminate immediately when it becomes available.
    workerPromise=workerPromise.then(instance=>{worker=instance;if(signal?.aborted)void terminate(instance);return instance;});
    if(signal){abortHandler=()=>{if(worker)void terminate(worker);else if(workerPromise)void workerPromise.then(terminate).catch(()=>{});};signal.addEventListener('abort',abortHandler,{once:true});}
@@ -26,7 +26,7 @@ export function createOcrService({loadEngine=()=>import('../vendor/tesseract/tes
    const rawText=String(recognized?.data?.text??'');const confidence=Number.isFinite(recognized?.data?.confidence)?recognized.data.confidence:null;
    const result={rawText,normalizedText:normalizeOcrText(rawText),confidence,durationMs:Math.round(performance.now()-started),languages:OCR_LANGUAGES,engine:OCR_ENGINE_VERSION,image:{originalBytes:blob.size,sourceWidth:prepared.sourceWidth,sourceHeight:prepared.sourceHeight,processedWidth:prepared.width,processedHeight:prepared.height,processedBytes:prepared.blob.size,wasResized:prepared.wasResized,maxDimension:MAX_OCR_DIMENSION},processedPreviewBlob:prepared.previewBlob};
    return result;
-  }catch(error){if(error?.name!=='AbortError')console.error('[Netlixy OCR] No se pudo reconocer la etiqueta:',error?.message||error);throw error;}
+  }catch(error){if(error?.name!=='AbortError')console.error('[WiFi Connect OCR] No se pudo reconocer la etiqueta:',error?.message||error);throw error;}
   finally{
    if(signal&&abortHandler)signal.removeEventListener('abort',abortHandler);
    if(worker)await terminate(worker);else if(workerPromise)void workerPromise.then(terminate).catch(()=>{});

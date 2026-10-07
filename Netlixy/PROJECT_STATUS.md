@@ -1,7 +1,7 @@
-# Netlixy — estado del proyecto
+# WiFi Connect — estado del proyecto
 
-**Bloque actual:** Prompt 11 — marca Netlixy y preparación de GitHub Pages
-**Actualizado:** 06/10/2026
+**Bloque actual:** FASE 1 — Branding WiFi Connect
+**Actualizado:** 07/10/2026
 
 Leyenda: 🟢 completado y comprobado · 🟡 implementado pendiente de prueba real · 🔴 error o bloqueo · ⚪ todavía no iniciado.
 
@@ -401,3 +401,15 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 Botón central centrado en su columna y alineado dentro de la barra inferior con safe area y glow discreto.
 - 🟢 Caché del Service Worker actualizada a netlixy-v1.11.2; se conserva la limpieza de cachés anteriores.
 - 🟡 Revisión visual iPhone física pendiente.
+
+
+## FASE 1 — Branding (2026-10-07)
+
+- 🟢 Nombre visible actualizado a `WiFi Connect` en Inicio, Ajustes, validación, informes, laboratorio, título y metadatos de instalación.
+- 🟢 Manifest actualizado con nombre, nombre corto y descripción de WiFi Connect.
+- 🟢 Ajustes muestra `WiFi Connect` y `V1.14.0`, usando `APP_VERSION` como única fuente de verdad visible y en informes.
+- 🟢 README actualizado al nombre y descripción del producto.
+- 🟢 Service Worker/caché actualizado a `wifi-connect-v1.14.0`; activa limpieza compatible con cachés `netlixy-*` y `wifi-connect-*`.
+- 🟡 PWA instalada pendiente de comprobar en iPhone.
+- 🟡 Nombre antiguo de repositorio/URL mantenido temporalmente por compatibilidad: `faroma30/Netlixy`, `/Netlixy/`.
+- ⚪ IndexedDB y sus identificadores internos se conservan sin migración; el nombre heredado del proyecto/paquete también se mantiene como identificador técnico.
