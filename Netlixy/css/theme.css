@@ -417,3 +417,31 @@ body { min-height:100dvh;background:radial-gradient(ellipse at 50% 12%,#071a30 0
   .home-brand { min-height:110px; }
   .home-recent { margin-top:15px; }
 }
+
+/* Redes navigation and the scan action stay centered independently of the labels. */
+.home-action-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.home-action-grid .action-card:first-child { grid-column:auto;min-height:91px; }
+.home-action-grid .action-card:nth-child(2) { min-height:91px; }
+.bottom-nav { grid-template-columns:repeat(4,minmax(0,1fr));position:relative; }
+.bottom-nav [data-tab="home"] { grid-column:1; }
+.bottom-nav [data-tab="recent"] { grid-column:3; }
+.bottom-nav [data-tab="settings"] { grid-column:4; }
+.bottom-nav .nav-scan { position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1;justify-self:auto;align-self:auto;margin:0; }
+.networks-screen>.recent-header { align-items:center;margin:4px 0 12px; }
+.networks-screen .page-heading { margin:0;font-size:22px; }
+.networks-screen>.recent-header .soft-button { min-height:36px;padding:7px 11px;border:1px solid #174360;background:#061729;color:#9cc9e4;font-size:11px; }
+.networks-screen .row-wifi svg { width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.settings-screen>.page-heading { margin-top:4px; }
+.settings-screen .settings-label { margin:16px 5px 7px; }
+.topbar { display:none; }
+@media (max-width:649px) {
+  .bottom-nav { position:fixed;grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .bottom-nav [data-tab="home"] { grid-column:1; }
+  .bottom-nav [data-tab="recent"] { grid-column:3; }
+  .bottom-nav [data-tab="settings"] { grid-column:4; }
+  .bottom-nav .nav-scan { top:calc((100% - env(safe-area-inset-bottom))/2); }
+}
+@media (min-width:650px) {
+  .bottom-nav { position:relative; }
+  .bottom-nav .nav-scan { position:absolute; }
+}
