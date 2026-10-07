@@ -385,3 +385,11 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟡 Revisión de PWA instalada pendiente.
 - ⚪ Ajustes finales tras uso real pendientes.
 - ⚪ Ninguna prueba física se marca como realizada.
+
+## UI / Ajustes tras captura real (2026-10-07)
+
+- 🟢 En móvil, el lienzo ocupa el viewport sin marco ni ancho máximo; navegación integrada con safe area inferior.
+- 🟢 Cabecera compactada; estado vacío de Recientes reducido; cuadrícula de acciones más baja y legible.
+- 🟢 Escanear router más destacado, con icono ampliado y glow cian discreto; acción enlazada al flujo real.
+- 🟢 Escritorio presenta una vista compacta de hasta 430 px con navegación dentro del panel.
+- 🟡 Viewports 390×844, 393×852 y 430×932 revisados en navegador responsive; revisión física en iPhone pendiente.

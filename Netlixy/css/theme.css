@@ -324,3 +324,76 @@ body { background:radial-gradient(ellipse at 50% 18%,#062044 0,#020b18 43%,#0107
 .toast { bottom:calc(94px + env(safe-area-inset-bottom)); }
 @media (min-width:650px) { .home-brand { min-height:145px; } }
 @media (max-width:380px) { .app-shell { padding-left:15px;padding-right:15px; } .home-action-grid { grid-template-columns:1fr 1fr; } .home-action-grid .action-card { min-height:86px;padding:9px;gap:8px; } .home-action-grid .action-card strong { font-size:12px; } .home-action-grid .action-card small { font-size:10px; } }
+
+/* Native-feeling mobile canvas and compact desktop preview refinement. */
+:root { --navy:#030914; --blue:#087cff; --electric:#08c9ff; --line:#174360; --shadow:0 10px 23px #00091499; }
+html,body { width:100%;min-height:100%;background:#030914; }
+body { min-height:100dvh;background:radial-gradient(ellipse at 50% 12%,#071a30 0,#030914 49%,#020711 100%); }
+.app-shell { width:100%;max-width:none;min-height:100dvh;margin:0;padding:calc(env(safe-area-inset-top) + 4px) max(17px,env(safe-area-inset-left)) calc(94px + env(safe-area-inset-bottom));border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible; }
+.topbar { height:38px; }
+.icon-button { width:38px;height:38px; }
+.home-screen { padding-top:0; }
+.home-brand { min-height:98px;margin:-2px 0 9px; }
+.home-logo { width:54px;height:44px;filter:drop-shadow(0 0 8px #00aeff4d); }
+.home-logo svg { width:54px;stroke-width:4.6; }
+.home-brand h1 { font-size:27px;letter-spacing:.07em;text-shadow:0 0 13px #138fff3d; }
+.home-actions { gap:9px; }
+.action-card { border-color:#17415b;background:linear-gradient(145deg,#081a2b 0%,#05111e 74%,#040d18 100%);box-shadow:0 8px 20px #00091470,inset 0 1px #83dfff0a,inset 0 -1px #00101e; }
+.action-card .card-icon { width:43px;height:43px;border-color:#105073;background:linear-gradient(145deg,#082946,#05182a); }
+.action-card .card-icon svg { width:29px;height:29px;stroke-width:1.9; }
+.action-card strong { color:#f2f8ff;font-size:14px; }
+.action-card small { color:#7f9bb5;font-size:10px; }
+.scan-action { min-height:96px;padding:15px 17px;border-color:#087ba8;background:radial-gradient(ellipse at 10% 50%,#073555 0,#061a2d 50%,#04121f 100%);box-shadow:0 0 19px #00bfff17,0 9px 22px #000a14a0,inset 0 1px #7ce8ff17,inset 0 -1px #00111d; }
+.scan-action .card-icon { width:54px;height:54px;border-color:#0b729c;background:linear-gradient(145deg,#064064,#05213a);box-shadow:0 0 13px #00bdff22,inset 0 1px #8beaff15; }
+.scan-action .card-icon svg { width:34px;height:34px;stroke-width:1.85; }
+.scan-action strong { font-size:15px; }
+.home-action-grid { gap:9px; }
+.home-action-grid .action-card { min-height:77px;padding:10px;gap:9px; }
+.home-action-grid .action-card .card-icon { width:39px;height:39px;flex-basis:39px; }
+.home-action-grid .action-card .card-icon svg { width:27px;height:27px; }
+.home-action-grid .action-card>span:nth-child(2) { flex:1;min-width:0; }
+.home-action-grid .action-card strong { font-size:13px; }
+.home-action-grid .action-card small { display:none; }
+.home-recent { margin-top:17px; }
+.home-recent h2 { font-size:16px; }
+.home-network-list { gap:6px;margin-top:9px; }
+.list-row { min-height:58px;padding:8px 10px;border-color:#133c57;background:linear-gradient(110deg,#071a2a,#040f1b);box-shadow:0 5px 13px #00091276,inset 0 1px #8adfff08; }
+.list-row .row-wifi { width:40px;height:40px;background:linear-gradient(145deg,#092c47,#061a2d);color:#70d9ff; }
+.list-row .row-wifi svg { width:30px;height:30px; }
+.home-empty { min-height:55px;grid-template-columns:auto 1fr;gap:0 10px;margin-top:9px;padding:8px 11px;border:1px solid #143b54;border-radius:14px;background:linear-gradient(110deg,#071a2a,#040f1b);box-shadow:0 5px 13px #00091276,inset 0 1px #8adfff08; }
+.home-empty .empty-icon { grid-row:auto;width:34px;height:34px;display:grid;place-items:center;font-size:0; }
+.home-empty .empty-icon svg { width:28px;height:28px; }
+.home-empty strong { font-size:12px; }
+.home-empty .muted { display:none; }
+.bottom-nav { left:0;bottom:0;transform:none;width:100%;height:calc(72px + env(safe-area-inset-bottom));grid-template-columns:1fr 1fr 64px 1fr;padding:5px 14px calc(5px + env(safe-area-inset-bottom));background:#030a15f5;border-top:1px solid #12354b;box-shadow:0 -7px 19px #00081366;backdrop-filter:blur(16px) saturate(120%); }
+.bottom-nav button { height:51px;gap:1px;color:#718da7; }
+.bottom-nav button span { width:35px;height:32px; }
+.bottom-nav button svg { width:23px;height:23px; }
+.bottom-nav button small { font-size:9px; }
+.bottom-nav button.active { color:#10bff2; }
+.bottom-nav button.active span { color:#12c7f5; }
+.bottom-nav .nav-scan { width:54px;height:54px;margin-top:-11px;border-color:#38cbf3;background:linear-gradient(145deg,#087cff,#05a9e5);box-shadow:0 0 0 4px #030a15,0 0 15px #00baff64; }
+.bottom-nav .nav-scan svg { width:26px;height:26px; }
+@media (max-width:380px) {
+  .app-shell { padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right)); }
+  .home-action-grid .action-card { min-height:74px;padding:8px;gap:7px; }
+  .home-action-grid .action-card .card-icon { width:36px;height:36px;flex-basis:36px; }
+  .home-action-grid .action-card strong { font-size:12px; }
+}
+@media (min-width:650px) {
+  body { padding:24px 0;background:radial-gradient(ellipse at 50% 10%,#0a1b2e 0,#030914 70%); }
+  .app-shell { display:flex;flex-direction:column;width:min(430px,calc(100% - 40px));max-width:430px;min-height:0;margin:0 auto;padding:8px 18px 0;border:1px solid #16394f;border-radius:25px;background:linear-gradient(155deg,#050e1a,#030914 75%);box-shadow:0 18px 55px #000b16;overflow:hidden; }
+  .app-shell>main { flex:0 0 auto; }
+  .home-brand { min-height:96px;margin-bottom:8px; }
+  .home-actions { gap:8px; }
+  .home-action-grid { gap:8px; }
+  .home-action-grid .action-card { min-height:74px; }
+  .home-recent { margin-top:15px; }
+  .bottom-nav { position:static;left:auto;bottom:auto;transform:none;width:calc(100% + 36px);height:70px;flex:0 0 70px;margin:20px -18px 0;grid-template-columns:1fr 1fr 64px 1fr;border-radius:0 0 24px 24px; }
+  .bottom-nav .nav-scan { width:52px;height:52px; }
+}
+@media (max-width:649px) {
+  .home-screen { min-height:clamp(580px,76dvh,700px);display:flex;flex-direction:column; }
+  .home-recent { margin-top:auto;padding-top:24px; }
+}
+@media (min-width:650px) { .home-screen { min-height:0; } }
