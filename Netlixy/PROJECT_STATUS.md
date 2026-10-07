@@ -439,3 +439,12 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 `APP_VERSION` actualizado a `V1.16.0`; Service Worker a `wifi-connect-v1.16.0`, conservando la limpieza de cachés antiguas.
 - 🟡 Validación física en iPhone pendiente.
 - ⚪ Validación física en Android pendiente.
+
+## Etiquetas reales — Huawei EchoLife EG8145V5 (2026-10-07)
+
+- 🟢 Primera muestra real analizada a partir de la transcripción textual facilitada de una fotografía física; la imagen no se incluye en el repositorio.
+- 🟢 El parser reconoce `SSID1`/`SSID2` y tolera `SSIDI`/`SSIDl`; conserva ambos candidatos para que la persona elija la banda.
+- 🟢 `WLAN Key` y variantes OCR moderadas tienen prioridad como contraseña Wi-Fi; `password:adminHW` en contexto de `username:root` se excluye como credencial administrativa.
+- 🟢 La seguridad queda como WPA/WPA2 asumida cuando no aparece indicada; operador permanece desconocido/no identificado.
+- 🟡 Repetir OCR físico en iPhone con la fotografía original pendiente; sin la imagen no se ha verificado la salida real de Tesseract.
+- 🟢 `APP_VERSION` actualizado a `V1.16.1`; Service Worker a `wifi-connect-v1.16.1`, conservando la limpieza de cachés antiguas.
