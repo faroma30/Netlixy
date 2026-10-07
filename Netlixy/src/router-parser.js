@@ -196,16 +196,20 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
     const passwordMatch=qr.password?ocrPasswords.find(candidate=>candidate.value===qr.password):null;
     const passRecords=Array.isArray(input?.passes)?input.passes:[];
     const corroboratedDisagreement=(candidate,fieldValue)=>candidate.value!==fieldValue&&candidate.score>=70&&passRecords.filter(pass=>String(pass.normalizedText||'').split(/\r?\n/).some(source=>source.trim()===candidate.sourceLine)).length>1;
-    qrSsidConflict=ocrSsid.some(candidate=>candidate.value!==qr.ssid&&candidate!==ssidPartialMatch&&(!ssidMatch||corroboratedDisagreement(candidate,qr.ssid)));
-    qrPasswordConflict=Boolean(qr.password&&ocrPasswords.some(candidate=>candidate.value!==qr.password&&(!passwordMatch||corroboratedDisagreement(candidate,qr.password))));
+    // A single OCR disagreement is often label/barcode noise. Keep a QR
+    // credential authoritative unless the same competing OCR line survives
+    // both independent passes with a strong score.
+    qrSsidConflict=ocrSsid.some(candidate=>candidate.value!==qr.ssid&&candidate!==ssidPartialMatch&&corroboratedDisagreement(candidate,qr.ssid));
+    qrPasswordConflict=Boolean(qr.password&&ocrPasswords.some(candidate=>candidate.value!==qr.password&&corroboratedDisagreement(candidate,qr.password)));
     qrSecurityConflict=Boolean(qr.security&&!ocrSecurity.inferred&&qr.security!==ocrSecurity.value);
     qrConflict=Boolean(qrSsidConflict||qrPasswordConflict||qrSecurityConflict);
     qrAgreement=Boolean(ssidCorroborated&&(!qr.password||passwordMatch)&&!qrSecurityConflict);
-    addCandidate(ssidCandidates,qr.ssid,qrAgreement?100:96,'QR Wi-Fi válido','QR Wi-Fi: SSID','ssid');
+    addCandidate(ssidCandidates,qr.ssid,qrSsidConflict?96:110,'QR Wi-Fi válido','QR Wi-Fi: SSID','ssid');
     qrSsidCandidate=ssidCandidates.find(candidate=>candidate.value===qr.ssid);
-    if(qrSsidCandidate){qrSsidCandidate.source=ssidCorroborated?'qr+ocr':'qr';qrSsidCandidate.qrAgreement=ssidCorroborated;qrSsidCandidate.needsReview=Boolean(qrSsidConflict||qrSecurityConflict);}
-    if(qr.password){addCandidate(passwordCandidates,qr.password,qrAgreement?100:96,'QR Wi-Fi válido','QR Wi-Fi: contraseña','password');qrPasswordCandidate=passwordCandidates.find(candidate=>candidate.value===qr.password);if(qrPasswordCandidate){qrPasswordCandidate.source=passwordMatch?'qr+ocr':'qr';qrPasswordCandidate.qrAgreement=Boolean(passwordMatch);qrPasswordCandidate.needsReview=Boolean(qrPasswordConflict||qrSecurityConflict);}}
-    if(qrConflict)for(const candidate of [...ocrSsid,...ocrPasswords])if(candidate.score>=70)candidate.needsReview=true;
+    if(qrSsidCandidate){qrSsidCandidate.source=ssidCorroborated?'qr+ocr':'qr';qrSsidCandidate.qrAgreement=ssidCorroborated;qrSsidCandidate.needsReview=Boolean(qrSsidConflict);}
+    if(qr.password){addCandidate(passwordCandidates,qr.password,qrPasswordConflict?96:110,'QR Wi-Fi válido','QR Wi-Fi: contraseña','password');qrPasswordCandidate=passwordCandidates.find(candidate=>candidate.value===qr.password);if(qrPasswordCandidate){qrPasswordCandidate.source=passwordMatch?'qr+ocr':'qr';qrPasswordCandidate.qrAgreement=Boolean(passwordMatch);qrPasswordCandidate.needsReview=Boolean(qrPasswordConflict);}}
+    if(qrSsidConflict)for(const candidate of ocrSsid)if(candidate.value!==qr.ssid&&candidate.score>=70)candidate.needsReview=true;
+    if(qrPasswordConflict)for(const candidate of ocrPasswords)if(candidate.value!==qr.password&&candidate.score>=70)candidate.needsReview=true;
   }
 
   const operator = profilesEnabled ? detectOperator({rawText, normalizedText:text}) : null;
@@ -229,8 +233,8 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
       }
     }
   }
-  ssidCandidates.sort((a, b) => b.score - a.score || Number(Boolean(b.qrAgreement)) - Number(Boolean(a.qrAgreement)));
-  passwordCandidates.sort((a, b) => b.score - a.score);
+  ssidCandidates.sort((a, b) => Number(Boolean(b.source?.startsWith('qr')&&!qrSsidConflict))-Number(Boolean(a.source?.startsWith('qr')&&!qrSsidConflict))||b.score-a.score||Number(Boolean(b.qrAgreement))-Number(Boolean(a.qrAgreement)));
+  passwordCandidates.sort((a, b) => Number(Boolean(b.source?.startsWith('qr')&&!qrPasswordConflict))-Number(Boolean(a.source?.startsWith('qr')&&!qrPasswordConflict))||b.score-a.score);
   let security = detectSecurity(lines);
   if(qrSecurityConflict)security.needsReview=true;
   if(qr?.security&&security.inferred)security={value:qr.security,detected:qr.security,inferred:false,confidence:qrAgreement?0.98:0.9,source:'qr',reason:'Seguridad explícita en QR Wi-Fi'};
@@ -255,7 +259,7 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
   if(qrAgreement)warnings.push('Los datos del QR Wi-Fi coinciden con el texto de la etiqueta.');
   if(qr&&!qrAgreement&&!qrConflict)warnings.push('Se detectó un QR Wi-Fi; revisa los datos antes de guardarlos.');
   if(qrConflict)warnings.push('El QR Wi-Fi y el texto OCR no coinciden; revisa ambos candidatos antes de continuar.');
-  return { ssid, password, security, ssidCandidates, passwordCandidates, excludedCandidates: excluded, warnings, operator, appliedProfiles, profileDiagnostics, parserVersion: '2.1-generic+profiles' };
+  return { ssid, password, security, ssidCandidates, passwordCandidates, excludedCandidates: excluded, warnings, qrConflicts:{ssid:qrSsidConflict,password:qrPasswordConflict,security:qrSecurityConflict}, operator, appliedProfiles, profileDiagnostics, parserVersion: '2.1-generic+profiles' };
 }
 
 function detectSecurity(lines) {

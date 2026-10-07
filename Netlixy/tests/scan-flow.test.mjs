@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {buildScanPlan,persistRecentBeforeReady} from '../src/scan-flow.js';
+import {buildScanPlan,createScannedNetwork,persistRecentBeforeReady} from '../src/scan-flow.js';
 
 const orange={ssid:{value:'Livebox6-DFD9'},ssidCandidates:[{value:'Livebox6-DFD9',score:100,qrAgreement:true}],password:{value:'ValidSecret123'},security:{value:'WPA/WPA2'},qrAgreement:true};
 assert.equal(buildScanPlan(orange).state,'ready','OCR/QR-confirmed single network goes straight to Red lista');
+const qrOnlyPassword={...orange,password:{value:'QRCodeSecret123',source:'qr'},qrConflicts:{ssid:false,password:false,security:false}};const qrPlan=buildScanPlan(qrOnlyPassword);assert.equal(qrPlan.state,'ready','QR password remains ready with incomplete OCR');const readyNetwork=createScannedNetwork(qrOnlyPassword,qrPlan.candidate,{hidden:false});assert.equal(readyNetwork.password,'QRCodeSecret123','Red lista state receives the independently decoded QR password');assert.equal(readyNetwork.ssid,'Livebox6-DFD9');
 const band24={value:'HUAWEI-2 4G-28bi -—',proposedValue:'HUAWEI-2.4G-28bi',band:'2.4 GHz',score:84,corrected:true,correctionConfidence:'high',correctionScore:8,needsReview:true};
 const band5={value:'HUAWEI-5G-28bi',band:'5 GHz',score:82};
 const huawei={ssid:{value:band5.value},ssidCandidates:[band24,band5],password:{value:'WlanSecret123'},security:{value:'WPA/WPA2'}};
@@ -12,13 +13,14 @@ assert.equal(buildScanPlan(huawei,{selectedCandidate:band24}).state,'ready','hig
 assert.equal(buildScanPlan(huawei,{selectedCandidate:band5}).state,'ready');
 const taggedHuawei={...huawei,ssidCandidates:[{...band5,score:100,reason:'Etiqueta SSID: valor en la misma línea',needsReview:true}],password:{value:'dab918ck',score:100,reason:'Etiqueta de contraseña Wi-Fi: valor en la misma línea',needsReview:true}};
 assert.equal(buildScanPlan(taggedHuawei).state,'ready','strong labeled OCR candidates are usable despite a modest page-wide OCR confidence');
-const conflict={...orange,warnings:['El QR Wi-Fi y el texto OCR no coinciden; revisa ambos candidatos antes de continuar.']};
-assert.deepEqual(buildScanPlan(conflict).fields,['ssid','password'],'QR/OCR source conflicts still require review');
+const conflict={...orange,qrConflicts:{ssid:false,password:true}};
+assert.deepEqual(buildScanPlan(conflict).fields,['password'],'only the reliably conflicting field requires review');
 const doubtful={...orange,ssidCandidates:[{value:'Livebox6-DFD9',score:100,needsReview:true}]};assert.deepEqual(buildScanPlan(doubtful).fields,['ssid'],'only the uncertain field is requested');
 const missing={ssidCandidates:[],password:null};assert.equal(buildScanPlan(missing).state,'error','total failure uses the simple recovery screen');
 const order=[];const recent=await persistRecentBeforeReady({ssid:'Casa'},{saveRecent:async network=>{order.push('saved');return {...network,type:'recent'};},showReady:async network=>{assert.equal(network.type,'recent');order.push('ready');}});assert.deepEqual(order,['saved','ready']);assert.equal(recent.type,'recent');
 const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 assert.match(app,/if\(action==='capture'\)[\s\S]*?camera\.confirmImage\(\);await beginOcr\(\)/,'a camera capture proceeds directly to analysis');
+assert.match(app,/onDiagnostics:snapshot=>persistScanDiagnostics/,'safe diagnostics persist as the real analyzer advances, including before errors');assert.match(app,/data-action="validation-scan-copy"/,'validation mode exposes safe scan diagnostics copy');assert.match(app,/createScannedNetwork\(analysis\.parsed,candidate,analysis\.qr\)/,'Red lista uses the parsed QR password in the actual network state');
 assert.match(app,/function promoteScannedNetwork\(\)[\s\S]*?toast\('Red guardada'\);await render\(\)/,'Guardar promotes the existing recent in place with a toast');
 assert.match(app,/if\(action==='copy-password'\)[\s\S]*?touchRecentNetwork\(current\.id\)[\s\S]*?copyTextToClipboard\(current\.password\)/,'copying a recent password renews it and copies directly');
 assert.match(app,/if\(action==='regenerate'\)[\s\S]*?qrReturnRoute='detail';route='qr'/,'Show QR remembers Red lista as its return destination');
