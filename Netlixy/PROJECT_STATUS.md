@@ -407,9 +407,9 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 
 - 🟢 Nombre visible actualizado a `WiFi Connect` en Inicio, Ajustes, validación, informes, laboratorio, título y metadatos de instalación.
 - 🟢 Manifest actualizado con nombre, nombre corto y descripción de WiFi Connect.
-- 🟢 Ajustes muestra `WiFi Connect` y `V1.14.0`, usando `APP_VERSION` como única fuente de verdad visible y en informes.
+- 🟢 Ajustes muestra `WiFi Connect` y `V1.14.1`, usando `APP_VERSION` como única fuente de verdad visible y en informes.
 - 🟢 README actualizado al nombre y descripción del producto.
-- 🟢 Service Worker/caché actualizado a `wifi-connect-v1.14.0`; activa limpieza compatible con cachés `netlixy-*` y `wifi-connect-*`.
+- 🟢 Service Worker/caché actualizado a `wifi-connect-v1.14.1`; activa limpieza compatible con cachés `netlixy-*` y `wifi-connect-*`.
 - 🟡 PWA instalada pendiente de comprobar en iPhone.
 - 🟡 Nombre antiguo de repositorio/URL mantenido temporalmente por compatibilidad: `faroma30/Netlixy`, `/Netlixy/`.
 - ⚪ IndexedDB y sus identificadores internos se conservan sin migración; el nombre heredado del proyecto/paquete también se mantiene como identificador técnico.
