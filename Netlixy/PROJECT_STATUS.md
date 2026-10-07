@@ -393,3 +393,11 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 Escanear router más destacado, con icono ampliado y glow cian discreto; acción enlazada al flujo real.
 - 🟢 Escritorio presenta una vista compacta de hasta 430 px con navegación dentro del panel.
 - 🟡 Viewports 390×844, 393×852 y 430×932 revisados en navegador responsive; revisión física en iPhone pendiente.
+
+## UI / Escáner único en Inicio (2026-10-07)
+
+- 🟢 Eliminada la tarjeta duplicada Escanear router de Inicio; el botón central inferior conserva el acceso al flujo de escaneo existente.
+- 🟢 Inicio mantiene únicamente cuatro acciones en cuadrícula 2×2; recientes queda más próximo a las acciones y sin relleno ficticio.
+- 🟢 Botón central centrado en su columna y alineado dentro de la barra inferior con safe area y glow discreto.
+- 🟢 Caché del Service Worker actualizada a netlixy-v1.11.2; se conserva la limpieza de cachés anteriores.
+- 🟡 Revisión visual iPhone física pendiente.
