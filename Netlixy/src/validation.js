@@ -1,5 +1,5 @@
 import {isValidationAccessAllowed} from './config.js';
-export const APP_VERSION='V1.19.2';
+export const APP_VERSION='V1.20.0';
 export const VALIDATION_SECTIONS=[
  {id:'safari',title:'Safari',tests:['Abrir aplicación en Safari','Navegación Inicio / Recientes / Ajustes','Generar QR manual','Guardar red','Añadir nota','Editar nota','Cerrar Safari y volver a abrir','Persistencia IndexedDB']},
  {id:'camera',title:'Cámara',tests:['Solicitar permiso','Cámara trasera','Preview correcta','Capturar fotografía','Repetir fotografía','Confirmar fotografía','Abandonar pantalla detiene cámara']},
@@ -9,6 +9,7 @@ export const VALIDATION_SECTIONS=[
  {id:'qr-final',title:'QR final',tests:['Red detectada tras revisar los datos','Repetir OCR con foto real Huawei EchoLife EG8145V5','Copiar contraseña de una red reciente','Mostrar QR desde Red detectada','Promover reciente a Guardadas','Guardar nota en reciente sin hacerla permanente','Volver desde QR a Red detectada','Visualizar QR correctamente','Compartir QR','Escanear QR con otro teléfono','Conexión real a Wi-Fi']},
  {id:'pwa',title:'PWA instalada',tests:['Añadir a pantalla de inicio','Abrir en modo standalone','Navegación correcta','Cámara desde PWA','OCR desde PWA','IndexedDB persistente']},
  {id:'offline',title:'Offline',tests:['Abrir PWA sin Internet','Navegación offline','Generar QR offline','Abrir redes recientes offline','OCR offline después de haber descargado recursos']},
+ {id:'android',title:'Android físico · Chrome',tests:['Abrir WiFi Connect en Chrome Android','Navegación inferior Inicio / Escanear / Redes / Ajustes','Inicio → Recientes abre la pestaña Recientes','Inicio → Guardadas abre la pestaña Guardadas','Abrir detalle reciente y volver a Redes','Abrir detalle guardado y volver a Redes','Abrir cámara trasera','Capturar foto del router','Seleccionar imagen desde galería','Orientación de imagen correcta','OCR local en Android','Decodificar QR local con jsQR','Huawei: elegir bandas 2.4 GHz y 5 GHz','Orange Livebox 6: SSID y clave','Llegar a Red lista','Copiar contraseña','Crear o renovar Reciente 48 h','Promover Reciente a Guardada','Caducidad temporal de 48 h','Instalar PWA Android','Abrir PWA instalada y navegar','Abrir aplicación sin conexión','Diagnóstico de escaneo sin datos Wi-Fi sensibles']},
 ];
 export const VALIDATION_FAILURE_CATEGORIES=['Cámara','Fotos','OCR','Parser','QR','PWA','Offline','Interfaz','Otro'];
 export const VALIDATION_STATUS={untested:{label:'⚪ Sin probar',emoji:'⚪'},ok:{label:'🟢 OK',emoji:'🟢'},partial:{label:'🟡 Parcial',emoji:'🟡'},fail:{label:'🔴 Falla',emoji:'🔴'}};

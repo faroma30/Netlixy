@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {buildScanPlan,createScannedNetwork,persistRecentBeforeReady} from '../src/scan-flow.js';
+import {analyzeRouterImage} from '../src/router-image-analysis.js';
 
 const orange={ssid:{value:'Livebox6-DFD9'},ssidCandidates:[{value:'Livebox6-DFD9',score:100,qrAgreement:true}],password:{value:'ValidSecret123'},security:{value:'WPA/WPA2'},qrAgreement:true};
 assert.equal(buildScanPlan(orange).state,'ready','OCR/QR-confirmed single network goes straight to Red lista');
@@ -27,4 +28,16 @@ assert.match(app,/if\(action==='regenerate'\)[\s\S]*?qrReturnRoute='detail';rout
 assert.match(app,/if\(action==='back-qr'\)\{route=qrReturnRoute==='detail'\?'detail':'home'/,'QR returns directly to Red lista');
 assert.match(app,/function bandChoiceScreen\(\)[\s\S]*?<h1>Elige la red<\/h1>[\s\S]*?data-scan-choice/,'two bands show a simple choice screen');
 assert.match(app,/function ocrErrorScreen\(\)[\s\S]*?No he podido leer la etiqueta[\s\S]*?Repetir foto[\s\S]*?Elegir otra foto[\s\S]*?Introducir manualmente/,'total failure has exactly the three simple recovery actions');
+const home=app.slice(app.indexOf('async function home()'),app.indexOf('async function recent()'));
+assert.match(home,/Promise\.all\(\[storage\.listRecentNetworks\(\),storage\.listSavedNetworks\(\)\]\)/,'home counts come from the live IndexedDB-backed lists');
+assert.match(home,/data-network-tab="recent" data-go="recent"[\s\S]*data-network-tab="saved" data-go="recent"/,'home cards carry explicit destinations for both network tabs');
+assert.match(app,/if\(goButton\.dataset\.networkTab\)\{networkTab=goButton\.dataset\.networkTab;route='recent';/,'home action click forces Redes with its selected tab');
+assert.match(app,/if\(open\)\{detailReturnRoute='recent'/,'opening a network from the list records a return destination');
+assert.match(app,/if\(action==='detected-home'\)\{route=detailReturnRoute==='recent'\?'recent':'home'/,'back from network detail returns to its originating list');
+assert.match(app,/data-action="validation-scan-clear"/);assert.match(app,/sessionStorage\.removeItem\('wifi-connect-scan-diagnostics'\)/,'validation can clear session-only scan diagnostics');
+const safeSnapshots=[];const sensitiveSsid='Private SSID 932',sensitivePassword='PrivatePassword932';
+const mockParsed={ssid:{value:sensitiveSsid},ssidCandidates:[{value:sensitiveSsid,corrected:true,correctionType:'wifi-band-context'}],password:{value:sensitivePassword,source:'ocr'},passwordCandidates:[{value:sensitivePassword}],security:{value:'WPA/WPA2'}};
+const diagnosticRun=await analyzeRouterImage(new Blob(['fixture'],{type:'image/jpeg'}),{decodeQr:async()=>({status:'unavailable'}),recognize:async()=>({rawText:`SSID:${sensitiveSsid}\nPassword:${sensitivePassword}`,normalizedText:'redacted in diagnostics',confidence:88,durationMs:8,passes:[{id:'color',rawText:'',normalizedText:'',confidence:88,durationMs:8},{id:'grayscale-contrast',rawText:'',normalizedText:'',confidence:80,durationMs:9}]}),parse:()=>mockParsed,onDiagnostics:value=>safeSnapshots.push(value)});
+assert.equal(diagnosticRun.diagnostics.bandReconstructionApplied,true);assert.equal(diagnosticRun.diagnostics.ocrPasses.length,2);assert.equal(diagnosticRun.diagnostics.fusion.ssidCandidateCount,1);assert.equal(diagnosticRun.diagnostics.durationMs>=0,true);
+const safeDiagnosticJson=JSON.stringify(safeSnapshots.at(-1));assert.equal(safeDiagnosticJson.includes(sensitiveSsid),false);assert.equal(safeDiagnosticJson.includes(sensitivePassword),false);assert.equal(safeDiagnosticJson.includes('rawText'),false,'shared scan diagnostics never contain raw OCR or credentials');
 console.log('scan UX: Orange direct-ready, Huawei band choice then ready, isolated review, simple error, recent-before-ready passed');

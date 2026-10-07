@@ -485,3 +485,27 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 `APP_VERSION` actualizado a `V1.17.0`; Service Worker a `wifi-connect-v1.17.0`, con limpieza compatible de cachés anteriores.
 - 🟡 Validación física en iPhone pendiente, en especial selección de banda y SSID 2.4 GHz propuesto.
 - ⚪ Validación física en Android pendiente.
+
+## FASE 5 — Navegación y preparación Android (2026-10-07)
+
+### Navegación
+- 🟢 Recientes desde Inicio abre Redes con la pestaña Recientes seleccionada; la lista excluye vencidas mediante IndexedDB.
+- 🟢 Guardadas desde Inicio abre Redes con Guardadas seleccionada; el contador consulta los registros permanentes en IndexedDB.
+- 🟢 Ambas tarjetas muestran el recuento dinámico y siguen navegando cuando están vacías.
+- 🟢 Abrir una red desde cualquiera de las pestañas y volver regresa a Redes conservando la pestaña activa.
+- 🟢 Barra inferior: Inicio, Escanear, Redes y Ajustes; Redes usa su icono Wi-Fi y el escáner permanece centrado en 50% del ancho de la barra, con safe area.
+
+### Escáner y diagnóstico
+- 🟢 Huawei y Orange: funcionamiento físico en iPhone comunicado y validado por el usuario; no se modificaron OCR, parser ni fusión.
+- 🟢 Diagnóstico de sesión en modo validación: entorno, cámara/permisos, foto, QR, pases OCR, candidatos, reconstrucción, fuente, duración y error técnico sanitizado. Incluye ver, copiar y limpiar.
+- 🟢 Los diagnósticos compartibles excluyen SSID, contraseñas, imágenes y texto OCR; no se transmiten a servidores.
+
+### Android físico · pendiente
+- ⚪ Chrome, navegación, Inicio → Recientes/Guardadas y retorno desde detalle.
+- ⚪ Cámara trasera, permiso, captura, galería y orientación.
+- ⚪ OCR local, QR jsQR, Huawei 2.4/5 GHz, Orange Livebox 6 y pantalla Red lista.
+- ⚪ Copiar contraseña, Recientes 48 h, promoción a Guardadas y caducidad.
+- ⚪ Instalar/abrir PWA y prueba offline.
+- ⚪ Diagnóstico desde Android; los 23 pasos específicos quedan disponibles en el checklist de validación.
+
+- 🟢 `APP_VERSION` actualizado a `V1.20.0`; Service Worker a `wifi-connect-v1.20.0`, conservando la limpieza de cachés antiguas.
