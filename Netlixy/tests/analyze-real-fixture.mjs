@@ -3,6 +3,7 @@ import path from 'node:path';
 import Tesseract from 'tesseract.js';
 import {fileURLToPath} from 'node:url';
 import {analyzeRealFixtureText,summarizeRealFixtures} from '../src/real-fixture-analysis.js';
+import {parseRouterLabel} from '../src/router-parser.js';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
 const fixtureRoot=path.join(root,'fixtures/operators-real');
@@ -19,15 +20,19 @@ else {
   const dir=path.join(fixtureRoot,sample.id);let imagePath,text='';
   for(const name of ['input.local.jpg','input.local.jpeg','input.local.png','input.jpg','input.jpeg','input.png'])try{imagePath=path.join(dir,name);await fs.access(imagePath);break;}catch{imagePath=null;}
   let expected={};for(const name of ['expected.local.json','expected.json'])try{expected=JSON.parse(await fs.readFile(path.join(dir,name),'utf8'));break;}catch{}
+  let durationMs=null,confidence=null;
   if(imagePath){
-   let worker;try{const {createWorker,OEM,PSM}=Tesseract;worker=await createWorker('spa+eng',OEM.LSTM_ONLY,{workerPath:fileURLToPath(new URL('../vendor/tesseract/worker.min.js',import.meta.url)),corePath:fileURLToPath(new URL('../vendor/tesseract/core/',import.meta.url)),langPath:fileURLToPath(new URL('../vendor/tesseract/lang/',import.meta.url)),gzip:true,cacheMethod:'none'},{tessedit_pageseg_mode:PSM.AUTO});const result=await worker.recognize(imagePath);text=String(result.data.text||'');}finally{if(worker)await worker.terminate();}
+   let worker;try{const {createWorker,OEM,PSM}=Tesseract;worker=await createWorker('spa+eng',OEM.LSTM_ONLY,{langPath:fileURLToPath(new URL('../vendor/tesseract/lang/',import.meta.url)),gzip:true,cacheMethod:'none'},{tessedit_pageseg_mode:PSM.AUTO});const started=performance.now(),result=await worker.recognize(imagePath);durationMs=Math.round(performance.now()-started);confidence=result.data.confidence;text=String(result.data.text||'');}finally{if(worker)await worker.terminate();}
   } else {
    for(const name of ['ocr.local.txt','ocr.txt'])try{text=await fs.readFile(path.join(dir,name),'utf8');break;}catch{}
   }
   if(!text){console.error(`No se encontró imagen local ni ocr.local.txt para ${sample.id}.`);process.exitCode=2;}
   else {
-   const report=analyzeRealFixtureText(text,expected);const g=report.generic,p=report.profiled;
+   const report=analyzeRealFixtureText(text,expected);const g=report.generic,p=report.profiled,parsed=parseRouterLabel({rawText:text,normalizedText:text});
    console.log(`MUESTRA ${sample.id} · operador esperado ${expected.operator||'—'} · OCR local spa+eng / fuente ${imagePath?'imagen':'texto OCR guardado'}`);
+   if(durationMs!==null)console.log(`PASE OCR directo AUTO: ${durationMs} ms · confianza ${Number.isFinite(confidence)?confidence.toFixed(1)+'%':'—'}`);
+   const relevant=text.split(/\r?\n/).filter(line=>/SSID|WLAN\s*K/i.test(line));if(relevant.length)console.log(`LÍNEAS OCR WIFI: ${relevant.join(' | ')}`);
+   console.log(`BANDAS PROPUESTAS: ${parsed.ssidCandidates.filter(item=>item.band).map(item=>`${item.band} · ${item.value}${item.proposedValue?` → ${item.proposedValue} (${item.correctionConfidence}, ${item.correctionReason})`:''}`).join(' | ')||'ninguna'} · clave Wi-Fi ${parsed.password?.value?'recuperada':''} · genéricas excluidas ${parsed.excludedCandidates.filter(item=>item.reason.includes('WLAN Key')).length}`);
    console.log(`GENÉRICO: SSID ${yn(g.matches.ssid)} score ${safeTop(g.top.ssid).score??'—'} · contraseña ${yn(g.matches.password)} score ${safeTop(g.top.password).score??'—'} · seguridad ${yn(g.matches.security)} · operador ${yn(g.matches.operator)}`);
    console.log(`PERFILES: operador ${p.top.operator?.id||'no identificado'} · SSID ${yn(p.matches.ssid)} score ${safeTop(p.top.ssid).score??'—'} · contraseña ${yn(p.matches.password)} score ${safeTop(p.top.password).score??'—'} · seguridad ${yn(p.matches.security)}`);
    console.log(`DIFERENCIAS: SSID elegido cambió ${report.differences.ssidValueChanged?'sí':'no'}; contraseña elegida cambió ${report.differences.passwordValueChanged?'sí':'no'}; Δscore SSID ${report.differences.ssidScoreDelta}; Δscore contraseña ${report.differences.passwordScoreDelta}.`);

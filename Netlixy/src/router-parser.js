@@ -3,12 +3,15 @@ import {getOperatorProfile} from './operator-profiles/index.js';
 
 const SSID_LABELS = [
   [/^(?:ssid|ss[i1l]d)(?:\s*(?:[12]|[il])|\s+(?:2[.,]?4\s*(?:ghz|g)?|5\s*(?:ghz|g)?))?$/, 100, 'Etiqueta SSID'],
+  [/^(?:red\s+)?wi[ -]?f[i1l](?:\s+red)?$/, 100, 'Etiqueta RED Wi-Fi'],
+  [/^nombre\s+(?:de\s+)?wi[ -]?f[i1l]$/, 100, 'Etiqueta Nombre Wi-Fi'],
   [/^(?:wi[ -]?fi|wlan)\s*(?:name|nombre)$/, 92, 'Etiqueta de nombre Wi-Fi'],
   [/^(?:wi[ -]?fi|wlan)$/, 78, 'Etiqueta Wi-Fi/WLAN'],
   [/^(?:wireless|network)\s+name$/, 88, 'Etiqueta de nombre de red'],
   [/^(?:nombre\s+(?:de\s+)?(?:wi[ -]?fi|red)|red\s+(?:wi[ -]?fi|wlan))$/, 90, 'Etiqueta de nombre de red']
 ];
 const PASSWORD_LABELS = [
+  [/^(?:clave|cl[vw]ave)\s+(?:de\s+)?wi[ -]?f[i1l]$/, 100, 'Etiqueta CLAVE Wi-Fi'],
   [/^(?:wi[ -]?fi|wlan)\s*(?:password|passvvord|passw[o0]rd|key|kev|kcy|clave|contrase[nñ]a)$/, 100, 'Etiqueta de contraseña Wi-Fi'],
   [/^(?:wpa\s*[- ]?psk|wpa[23]?\s*[- ]?(?:key|clave)|pre[ -]?shared\s+key|psk)$/, 98, 'Etiqueta de clave WPA/PSK'],
   [/^(?:wireless|network)\s+(?:key|password|clave|contrase[nñ]a)$/, 94, 'Etiqueta de clave de red'],
@@ -39,7 +42,16 @@ function findLabel(label, table) {
 }
 function splitLabel(line) {
   const match = line.match(/^\s*(.{1,64}?)\s*[:=：＝]\s*(.*?)\s*$/);
-  if (!match) return { label: line.trim(), value: '' };
+  if (!match) {
+    const text=String(line||'').trim();
+    if(findLabel(text,SSID_LABELS)||findLabel(text,PASSWORD_LABELS))return {label:text,value:''};
+    const boundaries=[...text.matchAll(/\s+/g)].map(item=>item.index).reverse();
+    for(const boundary of boundaries){
+      const label=text.slice(0,boundary).trim(),value=text.slice(boundary).trim();
+      if(value&&(findLabel(label,SSID_LABELS)||findLabel(label,PASSWORD_LABELS)))return {label,value};
+    }
+    return {label:text,value:''};
+  }
   return { label: match[1].trim(), value: match[2].trim() };
 }
 function embeddedWlanKey(line){
@@ -49,6 +61,36 @@ function embeddedWlanKey(line){
  return {label:'WLAN Key',value:match[1].trim(),delimiter:/[:=：＝]/.test(match[0])};
 }
 function ssidBand(sourceLine){const match=String(sourceLine).match(/(?:^|[^\p{L}\p{N}])SS[i1l]D\s*([12]|[il])\b/i);return match?String(match[1]).toLowerCase().replace(/[il]/,'1'):null;}
+function bandToken(value){
+ const text=String(value||'');
+ const five=text.match(/(^|[-_ ])(5\s*(?:\.\s*0|,\s*0)?\s*G(?:Hz)?)(?=$|[-_ ])/i);
+ if(five)return {band:'5 GHz',start:five.index+five[1].length,end:five.index+five[1].length+five[2].length,raw:five[2],standard:'5G',strength:3};
+ const four=text.match(/(^|[-_ ])(2\s*(?:[.,]\s*|\s+)4\s*G(?:Hz)?|24\s*G(?:Hz)?)(?=$|[-_ ])/i);
+ if(four)return {band:'2.4 GHz',start:four.index+four[1].length,end:four.index+four[1].length+four[2].length,raw:four[2],standard:'2.4G',strength:/^2\s*[.,]/i.test(four[2])?3:2};
+ return null;
+}
+function annotateSsidBands(candidates){
+ for(const candidate of candidates){const token=bandToken(candidate.value);if(token)candidate.band=token.band;}
+ for(const candidate of candidates){
+  const token=bandToken(candidate.value);if(!token||token.band!=='2.4 GHz')continue;
+  const peers=candidates.filter(other=>other!==candidate&&ssidBand(other.sourceLine)&&bandToken(other.value)?.band==='5 GHz');
+  let best=null;
+  for(const peer of peers){
+   const peerToken=bandToken(peer.value);const left=candidate.value.slice(0,token.start),right=candidate.value.slice(token.end),rightForMatch=right.replace(/\s+[-–—]+\s*$/,'').replace(/\s+\d\s*$/,''),peerLeft=peer.value.slice(0,peerToken.start),peerRight=peer.value.slice(peerToken.end);
+   let prefix=0;while(prefix<left.length&&prefix<peerLeft.length&&left[prefix].toLowerCase()===peerLeft[prefix].toLowerCase())prefix++;
+   let suffix=0;while(suffix<rightForMatch.length&&suffix<peerRight.length&&rightForMatch[rightForMatch.length-1-suffix].toLowerCase()===peerRight[peerRight.length-1-suffix].toLowerCase())suffix++;
+   const prefixText=left.slice(0,prefix),suffixText=rightForMatch.slice(rightForMatch.length-suffix);
+    const compatible=prefixText.replace(/[^\p{L}\p{N}]/gu,'').length>=3&&suffixText.replace(/[^\p{L}\p{N}]/gu,'').length>=2;
+   const contextualScore=(token.strength===2?1:2)+(peer.score>=80?2:1)+(compatible?4:0)+(ssidBand(candidate.sourceLine)?1:0);
+   if(compatible&&contextualScore>=7&&(!best||contextualScore>best.score)){
+    const proposedValue=`${prefixText}2.4G${suffixText}`.replace(/\s+$/,'');
+    best={score:contextualScore,peer,proposedValue,prefixText,suffixText,tokenText:token.raw};
+   }
+  }
+  if(best){candidate.proposedValue=best.proposedValue;candidate.corrected=true;candidate.correctionType='wifi-band-context';candidate.correctionConfidence='high';candidate.correctionScore=best.score;candidate.correctionReason=`SSID emparejada con ${best.peer.value}, que indica 5 GHz y comparte prefijo y sufijo`;candidate.proposedFrom=candidate.value;candidate.correctionDiff=`${best.tokenText} → 2.4G`;candidate.needsReview=true;}
+  else if(/^\s*SS[i1l]D\s*[:=]/i.test(candidate.sourceLine)){candidate.bandConfidence=token.strength===2?'low':'medium';candidate.possibleBand='2.4 GHz';}
+ }
+}
 function scoreValue(value, base, kind) {
   let score = base;
   if (!value) return score;
@@ -61,7 +103,7 @@ function scoreValue(value, base, kind) {
 }
 function addCandidate(list, value, score, reason, sourceLine, kind) {
   const candidateValue = cleanCandidate(value);
-  const explicitPassword = kind === 'password' && /Etiqueta|contexto Wi-Fi/.test(reason);
+  const explicitPassword = kind === 'password' && /Etiqueta|contexto Wi-Fi|QR Wi-Fi/.test(reason);
   if (!plausible(candidateValue, explicitPassword)) return;
   const old = list.find(item => item.value === candidateValue);
   const candidate = { value: candidateValue, score: scoreValue(candidateValue, score, kind), reason, sourceLine };
@@ -128,6 +170,37 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
     }
   });
 
+  const explicitWlanKey=passwordCandidates.find(candidate=>/\bWLAN\s*K(?:ey|ev|cy)\b/i.test(candidate.sourceLine));
+  if(explicitWlanKey){
+    for(let index=passwordCandidates.length-1;index>=0;index--){
+      const candidate=passwordCandidates[index];
+      if(/^\s*(?:password|passvvord|passw[o0]rd)\s*[:=]/i.test(candidate.sourceLine)){
+        excluded.push({value:candidate.value,sourceLine:candidate.sourceLine,reason:'Contraseña genérica no propuesta porque se detectó una WLAN Key explícita'});
+        passwordCandidates.splice(index,1);
+      }
+    }
+  }
+
+  const qr=input?.qr?.type==='wifi'&&input.qr.ssid?input.qr:null;
+  let qrSsidCandidate=null,qrPasswordCandidate=null,qrConflict=false,qrAgreement=false,qrSecurityConflict=false;
+  if(qr){
+    const ocrSsid=ssidCandidates.filter(candidate=>candidate.score>=40);
+    const ocrPasswords=passwordCandidates.filter(candidate=>candidate.score>=40);
+    const ocrSecurity=detectSecurity(lines);
+    const ssidMatch=ocrSsid.find(candidate=>candidate.value===qr.ssid);
+    const passwordMatch=qr.password?ocrPasswords.find(candidate=>candidate.value===qr.password):null;
+    const ssidConflict=ocrSsid.some(candidate=>candidate.score>=70&&candidate.value!==qr.ssid);
+    const passwordConflict=qr.password&&ocrPasswords.some(candidate=>candidate.score>=70&&candidate.value!==qr.password);
+    qrSecurityConflict=Boolean(qr.security&&!ocrSecurity.inferred&&qr.security!==ocrSecurity.value);
+    qrConflict=Boolean(ssidConflict||passwordConflict||qrSecurityConflict);
+    qrAgreement=Boolean(ssidMatch&&(!qr.password||passwordMatch)&&!qrSecurityConflict);
+    addCandidate(ssidCandidates,qr.ssid,qrAgreement?100:96,'QR Wi-Fi válido','QR Wi-Fi: SSID','ssid');
+    qrSsidCandidate=ssidCandidates.find(candidate=>candidate.value===qr.ssid);
+    if(qrSsidCandidate){qrSsidCandidate.source=qrAgreement?'qr+ocr':'qr';qrSsidCandidate.qrAgreement=Boolean(ssidMatch);qrSsidCandidate.needsReview=Boolean(qrConflict||!qrAgreement);}
+    if(qr.password){addCandidate(passwordCandidates,qr.password,qrAgreement?100:96,'QR Wi-Fi válido','QR Wi-Fi: contraseña','password');qrPasswordCandidate=passwordCandidates.find(candidate=>candidate.value===qr.password);if(qrPasswordCandidate){qrPasswordCandidate.source=qrAgreement?'qr+ocr':'qr';qrPasswordCandidate.qrAgreement=Boolean(passwordMatch);qrPasswordCandidate.needsReview=Boolean(qrConflict||!qrAgreement);}}
+    if(qrConflict)for(const candidate of [...ocrSsid,...ocrPasswords])if(candidate.score>=70)candidate.needsReview=true;
+  }
+
   const operator = profilesEnabled ? detectOperator({rawText, normalizedText:text}) : null;
   const appliedProfiles = [];
   const profileDiagnostics = [];
@@ -149,9 +222,11 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
       }
     }
   }
-  ssidCandidates.sort((a, b) => b.score - a.score);
+  ssidCandidates.sort((a, b) => b.score - a.score || Number(Boolean(b.qrAgreement)) - Number(Boolean(a.qrAgreement)));
   passwordCandidates.sort((a, b) => b.score - a.score);
-  const security = detectSecurity(lines);
+  let security = detectSecurity(lines);
+  if(qrSecurityConflict)security.needsReview=true;
+  if(qr?.security&&security.inferred)security={value:qr.security,detected:qr.security,inferred:false,confidence:qrAgreement?0.98:0.9,source:'qr',reason:'Seguridad explícita en QR Wi-Fi'};
   const ssid = ssidCandidates[0] ? { ...ssidCandidates[0], confidence: Math.min(1, ssidCandidates[0].score / 100) } : null;
   const password = passwordCandidates[0] ? { ...passwordCandidates[0], confidence: Math.min(1, passwordCandidates[0].score / 100) } : null;
   const warnings = [];
@@ -165,10 +240,14 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
   const bandCandidates=new Map();
   for(const candidate of ssidCandidates){const band=ssidBand(candidate.sourceLine);if(band){const items=bandCandidates.get(band)||[];items.push(candidate);bandCandidates.set(band,items);}}
   for(const candidates of bandCandidates.values())if(new Set(candidates.map(candidate=>candidate.value)).size>1)for(const candidate of candidates)candidate.needsReview=true;
+  annotateSsidBands(ssidCandidates);
   if (ssidCandidates.filter(c => c.score >= 70).length > 1) warnings.push('Se han encontrado varios SSID; selecciona el correcto.');
   if (!ssid) warnings.push('No se ha podido identificar el nombre Wi-Fi.');
   if (!password && security.value !== 'Sin contraseña') warnings.push('No se ha podido identificar la contraseña Wi-Fi.');
   if (security.inferred) warnings.push('La seguridad no aparece en el texto; se propone WPA/WPA2 por defecto.');
+  if(qrAgreement)warnings.push('Los datos del QR Wi-Fi coinciden con el texto de la etiqueta.');
+  if(qr&&!qrAgreement&&!qrConflict)warnings.push('Se detectó un QR Wi-Fi; revisa los datos antes de guardarlos.');
+  if(qrConflict)warnings.push('El QR Wi-Fi y el texto OCR no coinciden; revisa ambos candidatos antes de continuar.');
   return { ssid, password, security, ssidCandidates, passwordCandidates, excludedCandidates: excluded, warnings, operator, appliedProfiles, profileDiagnostics, parserVersion: '2.1-generic+profiles' };
 }
 

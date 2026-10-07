@@ -21,6 +21,28 @@
       "manualCorrection": true,
       "passwordCorrect": true,
       "securityCorrect": true
+    },
+    {
+      "id": "orange-livebox6-real-001",
+      "operator": "orange",
+      "manufacturer": "Orange",
+      "model": "Livebox 6",
+      "source": "real-photo",
+      "status": "reviewed",
+      "ocrCorrect": true,
+      "operatorCorrect": true,
+      "ssidCorrect": true,
+      "passwordCorrect": true,
+      "securityCorrect": true,
+      "parserCorrect": true,
+      "manualCorrection": false,
+      "qrDecoded": true,
+      "qrMatchesOcr": true,
+      "bandInferred": false,
+      "ocrDurationMs": 3015,
+      "qrDurationMs": 599,
+      "failureCategories": [],
+      "notes": "La lectura en escala de grises recuperó las credenciales; el pase en color añadió una palabra al SSID y la comparación QR/OCR mantiene revisión humana. Credenciales omitidas intencionalmente."
     }
   ]
 }

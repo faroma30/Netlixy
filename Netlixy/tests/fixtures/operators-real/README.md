@@ -1,6 +1,6 @@
 # Etiquetas reales autorizadas
 
-**Estado actual: 0 muestras reales registradas.** Esta carpeta no contiene fotos ni credenciales. Añade solo fotos propias, anonimizadas o cuyo uso esté autorizado. No se crean patrones ni reglas mientras no existan muestras comprobables.
+**Estado actual: 2 muestras registradas en el índice.** Las fotografías y datos sensibles permanecen locales e ignorados por Git. Huawei tiene una foto privada local y Orange Livebox 6 fue procesada localmente con Tesseract y lector QR; no se guardaron sus credenciales en el repositorio. La compatibilidad física de los navegadores móviles sigue pendiente.
 
 Formato local sugerido:
 
@@ -15,7 +15,7 @@ Formato local sugerido:
 
 Los archivos locales están ignorados por `.gitignore`, incluidas fotos, texto OCR, resultados y valores esperados. No fuerces su inclusión con `git add -f`. Si se comparte una muestra, crea primero una copia revisada y redacta SSID, contraseña, números de serie, MAC, códigos QR y cualquier dato personal; usa `[REDACTED]` en los campos que se deban ocultar. Nunca subas `input.local.jpg`, secretos reales ni diagnósticos sin inspeccionarlos.
 
-`index.json` guarda únicamente metadatos no sensibles y comienza con `samples: []`. Al validar una muestra, agrega un registro como:
+`index.json` guarda únicamente metadatos no sensibles. Al validar una muestra, agrega un registro como:
 
 ```json
 {

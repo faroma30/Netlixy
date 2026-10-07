@@ -428,6 +428,18 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟡 Validación física en iPhone pendiente.
 - ⚪ Validación física en Android pendiente.
 
+## Muestra Orange Livebox 6 — validación física local (2026-10-07)
+
+- 🟢 La foto `orange-livebox6-real-001/input.local.jpg` se conserva solo localmente e ignorada por Git; no se versionaron imagen, transcripción ni credenciales.
+- 🟢 Tesseract real `spa+eng`, tras el preprocesado actual, recuperó el SSID exacto y la etiqueta/clave Wi-Fi en el pase gris/contraste. Confianza combinada 83%; OCR completo 3015 ms.
+- 🟡 El pase en color añadió una palabra al SSID; el pase gris obtuvo el valor exacto. La fusión mantiene ambos candidatos y exige revisión humana.
+- 🟢 Orange se identifica por texto explícito `Orange Espagne`; confianza media. `Livebox 6` por sí solo no infiere operador.
+- 🟢 El lector QR local jsQR decodificó el QR como payload Wi-Fi estándar en 599 ms; los datos coinciden con los candidatos OCR exactos. Coste OCR + QR: 3614 ms en esta ejecución.
+- 🟢 Seguridad WPA/WPA2 está indicada por el payload QR; el parser OCR solo la asumiría si no hubiera dato explícito. La etiqueta no expresa bandas y no se propusieron 2.4 ni 5 GHz.
+- 🟢 Las etiquetas españolas sin dos puntos se reconocen sin alterar sus valores; si otro pase OCR entrega un SSID distinto, la discrepancia permanece visible para revisión.
+- 🟡 Compatibilidad física Safari iPhone / Chrome Android pendiente de validar en dispositivos.
+- 🟢 `APP_VERSION` actualizado a `V1.17.2`; Service Worker a `wifi-connect-v1.17.2`, con limpieza compatible de cachés antiguas.
+
 ## FASE 3 — Red detectada (2026-10-07)
 
 - 🟢 Revisión humana de SSID, contraseña y seguridad sigue siendo obligatoria; al confirmar, la red aparece en Recientes o reutiliza la ya guardada.
@@ -459,3 +471,17 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟡 OCR + parser end-to-end deja usable la red de 5 GHz y la contraseña, pero el SSID de 2.4 GHz aún necesita revisión humana.
 - ⚪ Recorte central experimental descartado: bajó la confianza y perdió SSID1; no se codifican coordenadas de esta etiqueta en producción.
 - 🟢 `APP_VERSION` actualizado a `V1.16.2`; Service Worker a `wifi-connect-v1.16.2`, conservando limpieza de cachés antiguas.
+
+## FASE 4 — Revisión OCR inteligente (2026-10-07)
+
+- 🟢 Interpretación de bandas 2.4/5 GHz solo dentro de valores SSID etiquetados; `24GAMES` no se interpreta como banda.
+- 🟢 Emparejamiento genérico de SSID por prefijo, sufijo y banda explícita, sin reglas por marca.
+- 🟢 Reconstrucción contextual conserva valor bruto, propuesta, fragmento corregido, score, confianza y motivo; queda marcada para revisión humana.
+- 🟢 La pantalla de revisión distingue propuesta/revisión y etiqueta 2.4 GHz / 5 GHz; dos bandas requieren elección explícita.
+- 🟢 Nota rápida ya se guarda al editar Reciente y se conserva al promover a Guardada (implementado en Fase 3; verificado, sin duplicar lógica).
+- 🟡 Huawei 2.4 GHz: OCR bruto sigue siendo dudoso; el parser propone `HUAWEI-2.4G-28bi` por contexto y exige revisión humana.
+- 🟢 Huawei 5 GHz y WLAN Key recuperados desde fotografía local mediante OCR real.
+- 🟡 Pase OCR focalizado por región/PSM no integrado; la prueba de navegador no produjo salida medible. No se afirma mejora del motor OCR.
+- 🟢 `APP_VERSION` actualizado a `V1.17.0`; Service Worker a `wifi-connect-v1.17.0`, con limpieza compatible de cachés anteriores.
+- 🟡 Validación física en iPhone pendiente, en especial selección de banda y SSID 2.4 GHz propuesto.
+- ⚪ Validación física en Android pendiente.
