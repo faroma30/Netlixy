@@ -1,0 +1,28 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {buildScanPlan,persistRecentBeforeReady} from '../src/scan-flow.js';
+
+const orange={ssid:{value:'Livebox6-DFD9'},ssidCandidates:[{value:'Livebox6-DFD9',score:100,qrAgreement:true}],password:{value:'ValidSecret123'},security:{value:'WPA/WPA2'},qrAgreement:true};
+assert.equal(buildScanPlan(orange).state,'ready','OCR/QR-confirmed single network goes straight to Red lista');
+const band24={value:'HUAWEI-2 4G-28bi -—',proposedValue:'HUAWEI-2.4G-28bi',band:'2.4 GHz',score:84,corrected:true,correctionConfidence:'high',correctionScore:8,needsReview:true};
+const band5={value:'HUAWEI-5G-28bi',band:'5 GHz',score:82};
+const huawei={ssid:{value:band5.value},ssidCandidates:[band24,band5],password:{value:'WlanSecret123'},security:{value:'WPA/WPA2'}};
+const choose=buildScanPlan(huawei);assert.equal(choose.state,'choose-band');assert.deepEqual(choose.choices.map(item=>item.band),['2.4 GHz','5 GHz']);
+assert.equal(buildScanPlan(huawei,{selectedCandidate:band24}).state,'ready','high-confidence contextual 2.4 GHz proposal does not force a full review');
+assert.equal(buildScanPlan(huawei,{selectedCandidate:band5}).state,'ready');
+const taggedHuawei={...huawei,ssidCandidates:[{...band5,score:100,reason:'Etiqueta SSID: valor en la misma línea',needsReview:true}],password:{value:'dab918ck',score:100,reason:'Etiqueta de contraseña Wi-Fi: valor en la misma línea',needsReview:true}};
+assert.equal(buildScanPlan(taggedHuawei).state,'ready','strong labeled OCR candidates are usable despite a modest page-wide OCR confidence');
+const conflict={...orange,warnings:['El QR Wi-Fi y el texto OCR no coinciden; revisa ambos candidatos antes de continuar.']};
+assert.deepEqual(buildScanPlan(conflict).fields,['ssid','password'],'QR/OCR source conflicts still require review');
+const doubtful={...orange,ssidCandidates:[{value:'Livebox6-DFD9',score:100,needsReview:true}]};assert.deepEqual(buildScanPlan(doubtful).fields,['ssid'],'only the uncertain field is requested');
+const missing={ssidCandidates:[],password:null};assert.equal(buildScanPlan(missing).state,'error','total failure uses the simple recovery screen');
+const order=[];const recent=await persistRecentBeforeReady({ssid:'Casa'},{saveRecent:async network=>{order.push('saved');return {...network,type:'recent'};},showReady:async network=>{assert.equal(network.type,'recent');order.push('ready');}});assert.deepEqual(order,['saved','ready']);assert.equal(recent.type,'recent');
+const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
+assert.match(app,/if\(action==='capture'\)[\s\S]*?camera\.confirmImage\(\);await beginOcr\(\)/,'a camera capture proceeds directly to analysis');
+assert.match(app,/function promoteScannedNetwork\(\)[\s\S]*?toast\('Red guardada'\);await render\(\)/,'Guardar promotes the existing recent in place with a toast');
+assert.match(app,/if\(action==='copy-password'\)[\s\S]*?touchRecentNetwork\(current\.id\)[\s\S]*?copyTextToClipboard\(current\.password\)/,'copying a recent password renews it and copies directly');
+assert.match(app,/if\(action==='regenerate'\)[\s\S]*?qrReturnRoute='detail';route='qr'/,'Show QR remembers Red lista as its return destination');
+assert.match(app,/if\(action==='back-qr'\)\{route=qrReturnRoute==='detail'\?'detail':'home'/,'QR returns directly to Red lista');
+assert.match(app,/function bandChoiceScreen\(\)[\s\S]*?<h1>Elige la red<\/h1>[\s\S]*?data-scan-choice/,'two bands show a simple choice screen');
+assert.match(app,/function ocrErrorScreen\(\)[\s\S]*?No he podido leer la etiqueta[\s\S]*?Repetir foto[\s\S]*?Elegir otra foto[\s\S]*?Introducir manualmente/,'total failure has exactly the three simple recovery actions');
+console.log('scan UX: Orange direct-ready, Huawei band choice then ready, isolated review, simple error, recent-before-ready passed');
