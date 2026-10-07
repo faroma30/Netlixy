@@ -2,6 +2,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {makeWifiPayload,validateNetwork,escapeWifi} from '../src/utils.js';
+import {pasteClipboardText} from '../src/clipboard.js';
+const pasted={value:'',focusCount:0,focus(){this.focusCount++;}};
+let readCount=0,successCount=0,failureCount=0;
+assert.equal(await pasteClipboardText({clipboard:{async readText(){readCount++;return 'copied-secret';}},target:pasted,onSuccess(){successCount++;},onFailure(){failureCount++;}}),true,'allowed clipboard read succeeds');
+assert.equal(readCount,1,'clipboard read is attempted immediately once');assert.equal(pasted.value,'copied-secret');assert.equal(pasted.focusCount,0);assert.equal(successCount,1);assert.equal(failureCount,0);
+assert.equal(await pasteClipboardText({clipboard:{async readText(){throw new Error('Permission denied');}},target:pasted,onSuccess(){successCount++;},onFailure(){failureCount++;}}),false,'rejected clipboard read falls back');assert.equal(pasted.focusCount,1);assert.equal(failureCount,1);assert.equal(successCount,1);
+assert.equal(await pasteClipboardText({clipboard:undefined,target:pasted,onSuccess(){successCount++;},onFailure(){failureCount++;}}),false,'missing Clipboard API falls back');assert.equal(pasted.focusCount,2);assert.equal(failureCount,2);assert.equal(successCount,1);
 const special=makeWifiPayload({ssid:'Casa, sala; "5G"',password:'p;ass\\word,:"',security:'WPA/WPA2'});
 assert.equal(special,'WIFI:T:WPA;S:Casa\\, sala\\; \\"5G\\";P:p\\;ass\\\\word\\,\\:\\";;');
 assert.equal(makeWifiPayload({ssid:'Libre',security:'Sin contraseña'}),'WIFI:T:nopass;S:Libre;;');
@@ -27,7 +34,8 @@ const app=fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8');asser
 assert.match(app,/function formMarkup\(\)/);assert.match(app,/data-origin="manual"/);assert.match(app,/data-action="paste">Pegar/);assert.match(app,/Si es tu red actual, copia la contraseña desde Ajustes y pégala aquí\./);assert.doesNotMatch(app,/Mi red Wi-Fi|data-go="mine"/,'the duplicate current-Wi-Fi form is removed from navigation');assert.match(app,/route=next==='mine'\?'manual':next/,'legacy Mi red route redirects to the unified form');
 assert.ok(fs.existsSync(new URL('../css/theme.css',import.meta.url)),'restyling theme stylesheet exists');const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
 assert.match(html,/<title>Netlixy<\/title>/);assert.doesNotMatch(html,/(?:href|src)="\//,'GitHub Pages resources remain relative to the project path');
-assert.match(sw,/const CACHE_NAME='netlixy-v1\.12\.0'/);assert.match(sw,/key\.startsWith\('wifi-connect-'\)\|\|key\.startsWith\('netlixy-'\)/,'activation removes app caches only');
+assert.match(sw,/const CACHE_NAME='netlixy-v1\.12\.1'/);assert.match(sw,/key\.startsWith\('wifi-connect-'\)\|\|key\.startsWith\('netlixy-'\)/,'activation removes app caches only');assert.ok(sw.includes('./src/clipboard.js'),'clipboard helper is available offline');
+assert.match(app,/onFailure:\(\)=>toast\('No se pudo leer el portapapeles\. Mantén pulsado y pega manualmente\.'\)/);assert.doesNotMatch(fs.readFileSync(new URL('../src/clipboard.js',import.meta.url),'utf8'),/alert\(|confirm\(|ask\(|modal/i,'clipboard fallback does not open an app modal');
 assert.match(fs.readFileSync(new URL('../src/app.js',import.meta.url),'utf8'),/register\('\.\/service-worker\.js',\{scope:'\.\/'\}\)/);
 for(const path of ['./','./css/theme.css','./vendor/qrcode-generator.js','./src/app.js','./src/config.js','./src/validation.js','./src/lab-diagnostics.js','./src/router-parser.js','./src/operator-detector.js','./src/operator-profiles/index.js','./src/operator-profiles/digi.js','./src/operator-profiles/movistar-o2.js','./src/operator-profiles/orange-jazztel.js','./src/operator-profiles/vodafone-lowi.js','./src/camera.js'])assert.ok(sw.includes(path),`service worker precaches ${path}`);
 for(const path of ['./vendor/tesseract/core/worker.min.js','./vendor/tesseract/core/tesseract-core-lstm.wasm.js','./vendor/tesseract/core/tesseract-core-lstm.wasm','./vendor/tesseract/core/tesseract-core-simd-lstm.wasm','./vendor/tesseract/core/tesseract-core-relaxedsimd-lstm.wasm','./vendor/tesseract/lang/eng.traineddata.gz','./vendor/tesseract/lang/spa.traineddata.gz']){assert.ok(sw.includes(path),`service worker has lazy OCR resource ${path}`);assert.ok(fs.existsSync(new URL(`../${path.slice(2)}`,import.meta.url)),`local OCR resource exists ${path}`);}
