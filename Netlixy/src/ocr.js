@@ -31,11 +31,16 @@ export function createOcrService({loadEngine=()=>import('../vendor/tesseract/tes
    const expectedBands=new Set([...firstNormalized.matchAll(/(?:^|[^\p{L}\p{N}])SS[i1l]D\s*([12]|[il])\b/giu)].map(match=>String(match[1]).toLowerCase().replace(/[il]/,'1')));
    const parsedBands=new Set(initialParse.ssidCandidates.map(candidate=>String(candidate.sourceLine).match(/(?:^|[^\p{L}\p{N}])SS[i1l]D\s*([12]|[il])\b/i)?.[1]?.toLowerCase().replace(/[il]/,'1')).filter(Boolean));
    const missingExpectedBand=[...expectedBands].some(band=>!parsedBands.has(band));
+   // A matching QR may let the app proceed without OCR corroboration, but it must
+   // never suppress the alternate OCR pass when the label password is missing.
+   const hasPasswordCandidate=initialParse.passwordCandidates.some(candidate=>candidate.score>=60);
    const qrCoversWifi=qrResult?.status==='wifi'&&Boolean(qrResult.ssid)&&(qrResult.security==='Sin contraseña'||Boolean(qrResult.password));
    const firstMatchesQr=qrCoversWifi&&initialParse.ssidCandidates.some(candidate=>candidate.value===qrResult.ssid);
+   const firstMatchesQrPassword=qrCoversWifi&&(!qrResult.password||initialParse.passwordCandidates.some(candidate=>candidate.value===qrResult.password));
    const hasBandLabels=expectedBands.size>0;
-   const qrCanSkipAlternate=qrCoversWifi&&firstMatchesQr&&!hasBandLabels;
-   const weak=!qrCanSkipAlternate&&(firstConfidence===null||firstConfidence<72||!initialParse.ssidCandidates.some(candidate=>candidate.score>=60)||!initialParse.passwordCandidates.some(candidate=>candidate.score>=60)||missingExpectedBand);
+   const qrPasswordDisagrees=qrCoversWifi&&Boolean(qrResult.password)&&hasPasswordCandidate&&!firstMatchesQrPassword;
+   const qrCanSkipAlternate=hasPasswordCandidate&&qrCoversWifi&&firstMatchesQr&&firstMatchesQrPassword&&!hasBandLabels;
+   const weak=!qrCanSkipAlternate&&(firstConfidence===null||firstConfidence<72||!initialParse.ssidCandidates.some(candidate=>candidate.score>=60)||!hasPasswordCandidate||missingExpectedBand||qrPasswordDisagrees);
    if(weak){
     throwIfAborted(signal);onStage('Mejorando lectura');const alternateStarted=performance.now();
     try{

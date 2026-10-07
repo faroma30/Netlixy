@@ -182,24 +182,29 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
   }
 
   const qr=input?.qr?.type==='wifi'&&input.qr.ssid?input.qr:null;
-  let qrSsidCandidate=null,qrPasswordCandidate=null,qrConflict=false,qrAgreement=false,qrSecurityConflict=false;
+  let qrSsidCandidate=null,qrPasswordCandidate=null,qrConflict=false,qrAgreement=false,qrSecurityConflict=false,qrSsidConflict=false,qrPasswordConflict=false;
   if(qr){
     const ocrSsid=ssidCandidates.filter(candidate=>candidate.score>=40);
     const ocrPasswords=passwordCandidates.filter(candidate=>candidate.score>=40);
     const ocrSecurity=detectSecurity(lines);
     const ssidMatch=ocrSsid.find(candidate=>candidate.value===qr.ssid);
+    // OCR often continues an SSID line into adjacent serial/barcode text. When
+    // the exact QR SSID is intact at the start and followed by a separator,
+    // treat it as partial corroboration rather than a competing network.
+    const ssidPartialMatch=ocrSsid.find(candidate=>candidate.value.slice(0,qr.ssid.length).toLowerCase()===qr.ssid.toLowerCase()&&/^[\s:|,;—–-]/.test(candidate.value.slice(qr.ssid.length)));
+    const ssidCorroborated=Boolean(ssidMatch||ssidPartialMatch);
     const passwordMatch=qr.password?ocrPasswords.find(candidate=>candidate.value===qr.password):null;
     const passRecords=Array.isArray(input?.passes)?input.passes:[];
     const corroboratedDisagreement=(candidate,fieldValue)=>candidate.value!==fieldValue&&candidate.score>=70&&passRecords.filter(pass=>String(pass.normalizedText||'').split(/\r?\n/).some(source=>source.trim()===candidate.sourceLine)).length>1;
-    const ssidConflict=ocrSsid.some(candidate=>candidate.value!==qr.ssid&&(!ssidMatch||corroboratedDisagreement(candidate,qr.ssid)));
-    const passwordConflict=qr.password&&ocrPasswords.some(candidate=>candidate.value!==qr.password&&(!passwordMatch||corroboratedDisagreement(candidate,qr.password)));
+    qrSsidConflict=ocrSsid.some(candidate=>candidate.value!==qr.ssid&&candidate!==ssidPartialMatch&&(!ssidMatch||corroboratedDisagreement(candidate,qr.ssid)));
+    qrPasswordConflict=Boolean(qr.password&&ocrPasswords.some(candidate=>candidate.value!==qr.password&&(!passwordMatch||corroboratedDisagreement(candidate,qr.password))));
     qrSecurityConflict=Boolean(qr.security&&!ocrSecurity.inferred&&qr.security!==ocrSecurity.value);
-    qrConflict=Boolean(ssidConflict||passwordConflict||qrSecurityConflict);
-    qrAgreement=Boolean(ssidMatch&&(!qr.password||passwordMatch)&&!qrSecurityConflict);
+    qrConflict=Boolean(qrSsidConflict||qrPasswordConflict||qrSecurityConflict);
+    qrAgreement=Boolean(ssidCorroborated&&(!qr.password||passwordMatch)&&!qrSecurityConflict);
     addCandidate(ssidCandidates,qr.ssid,qrAgreement?100:96,'QR Wi-Fi válido','QR Wi-Fi: SSID','ssid');
     qrSsidCandidate=ssidCandidates.find(candidate=>candidate.value===qr.ssid);
-    if(qrSsidCandidate){qrSsidCandidate.source=qrAgreement?'qr+ocr':'qr';qrSsidCandidate.qrAgreement=Boolean(ssidMatch);qrSsidCandidate.needsReview=Boolean(qrConflict||!qrAgreement);}
-    if(qr.password){addCandidate(passwordCandidates,qr.password,qrAgreement?100:96,'QR Wi-Fi válido','QR Wi-Fi: contraseña','password');qrPasswordCandidate=passwordCandidates.find(candidate=>candidate.value===qr.password);if(qrPasswordCandidate){qrPasswordCandidate.source=qrAgreement?'qr+ocr':'qr';qrPasswordCandidate.qrAgreement=Boolean(passwordMatch);qrPasswordCandidate.needsReview=Boolean(qrConflict||!qrAgreement);}}
+    if(qrSsidCandidate){qrSsidCandidate.source=ssidCorroborated?'qr+ocr':'qr';qrSsidCandidate.qrAgreement=ssidCorroborated;qrSsidCandidate.needsReview=Boolean(qrSsidConflict||qrSecurityConflict);}
+    if(qr.password){addCandidate(passwordCandidates,qr.password,qrAgreement?100:96,'QR Wi-Fi válido','QR Wi-Fi: contraseña','password');qrPasswordCandidate=passwordCandidates.find(candidate=>candidate.value===qr.password);if(qrPasswordCandidate){qrPasswordCandidate.source=passwordMatch?'qr+ocr':'qr';qrPasswordCandidate.qrAgreement=Boolean(passwordMatch);qrPasswordCandidate.needsReview=Boolean(qrPasswordConflict||qrSecurityConflict);}}
     if(qrConflict)for(const candidate of [...ocrSsid,...ocrPasswords])if(candidate.score>=70)candidate.needsReview=true;
   }
 

@@ -38,6 +38,8 @@ async function run(){
   assert.equal(buildScanPlan(o.parsed).state,'ready','Orange real: SSID + clave confirmados por OCR/QR deben ir directamente a Red lista.');
   log(`PASS Orange real · OCR ${o.ocr.confidence}% · pases ${o.ocr.passes.map(pass=>pass.id).join('+')} · QR/OCR coinciden · sin banda · OCR ${o.ocr.durationMs} ms + QR ${o.qrDurationMs} ms`);
 
+  const orangeBitmap=await createImageBitmap(orange.blob,{imageOrientation:'from-image'});const orangeCanvas=document.createElement('canvas');orangeCanvas.width=orangeBitmap.width;orangeCanvas.height=orangeBitmap.height;orangeCanvas.getContext('2d',{alpha:false}).drawImage(orangeBitmap,0,0);orangeBitmap.close();const orangeCameraBlob=await new Promise(resolve=>orangeCanvas.toBlob(resolve,'image/jpeg',0.92));orangeCanvas.width=orangeCanvas.height=0;assert(orangeCameraBlob?.type==='image/jpeg','La conversión Orange tipo cámara debe generar image/jpeg');const orangeCamera=await analyzeRouterImage(orangeCameraBlob);assert(orangeCamera.parsed.ssidCandidates.some(candidate=>candidate.value===orange.expected.ssid),'Orange JPEG estilo cámara: SSID no recuperado.');assert(orangeCamera.parsed.passwordCandidates.some(candidate=>candidate.value===orange.expected.password),'Orange JPEG estilo cámara: clave QR no conservada.');assert.equal(buildScanPlan(orangeCamera.parsed).state,'ready','Orange JPEG estilo cámara: credenciales QR válidas deben llegar a Red lista.');assert(!orangeCamera.parsed.ssidCandidates.some(candidate=>candidate.band),'Orange JPEG estilo cámara: no inferir banda.');log(`PASS Orange JPEG estilo cámara · ${orangeCameraBlob.size} bytes · fuente clave ${orangeCamera.parsed.password.source||'OCR'} · QR ${orangeCamera.qr.status} · Red lista`);
+
   const recentOrder=[];await persistRecentBeforeReady({ssid:orange.expected.ssid},{saveRecent:async network=>{recentOrder.push('recent');return {...network,type:'recent'};},showReady:async network=>{assert.equal(network.type,'recent');recentOrder.push('ready');}});assert.deepEqual(recentOrder,['recent','ready'],'Orange: Reciente debe quedar guardada antes de Red lista.');
   log('PASS Flujo UX real · Orange 0 toques tras analizar · Huawei 1 toque para elegir banda · Reciente antes de Red lista');
 
@@ -49,4 +51,4 @@ async function run(){
   document.body.dataset.status='pass';log('RESULTADO: PASS');
  }catch(error){document.body.dataset.status='fail';log(`FAIL: ${String(error?.message||error)}`);console.error('[Real image E2E]',error);}
 }
-run();
+await run();

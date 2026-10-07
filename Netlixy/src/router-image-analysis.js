@@ -2,6 +2,18 @@ import {recognizeRouterLabel} from './ocr.js';
 import {decodeQrPayloadFromImage} from './wifi-qr.js';
 import {parseRouterLabel} from './router-parser.js';
 
+function passDiagnostics(ocr){
+ return (ocr?.passes||[]).map(pass=>{
+  const parsed=parseRouterLabel({rawText:pass.rawText,normalizedText:pass.normalizedText});
+  const sourceLines=String(pass.normalizedText||'').split(/\r?\n/);
+  return {id:pass.id,confidence:pass.confidence??null,durationMs:pass.durationMs??null,
+   ssidLabelDetected:sourceLines.some(line=>/\b(?:SSID(?:\s*[12])?|RED\s+WI[ -]?FI|NOMBRE\s+(?:DE\s+)?(?:WI[ -]?FI|RED))\b/i.test(line)),
+   passwordLabelDetected:sourceLines.some(line=>/\b(?:CLAVE\s+(?:DE\s+)?WI[ -]?FI|WI[ -]?FI\s*(?:KEY|PASSWORD)|WLAN\s*K(?:EY|EV|CY)|WPA\s*(?:KEY|PSK)|WIRELESS\s+(?:KEY|PASSWORD))\b/i.test(line)),
+   ssidDetected:Boolean(parsed.ssidCandidates.length),passwordDetected:Boolean(parsed.passwordCandidates.length),
+   passwordCandidateCount:parsed.passwordCandidates.length,passwordLength:Math.max(0,...parsed.passwordCandidates.map(item=>item.value.length))};
+ });
+}
+
 /** The single camera, gallery, and fixture pipeline. Image and credentials stay in memory on-device. */
 export async function analyzeRouterImage(blob,options={}){
  const signal=options.signal,onProgress=options.onProgress||(()=>{}),onStage=options.onStage||(()=>{}),recognize=options.recognize||recognizeRouterLabel,decodeQr=options.decodeQr||decodeQrPayloadFromImage,parse=options.parse||parseRouterLabel;
@@ -15,7 +27,10 @@ export async function analyzeRouterImage(blob,options={}){
  catch(error){if(error?.name==='AbortError')throw error;ocrError=String(error?.message||'OCR unavailable');if(qr.status!=='wifi')throw error;ocr={rawText:'',normalizedText:'',confidence:null,durationMs:0,passes:[],languages:'spa+eng',error:ocrError};}
  if(signal?.aborted){const error=new Error('Análisis cancelado.');error.name='AbortError';throw error;}
  const parsed=parse({...ocr,qr:qr.status==='wifi'?qr:null});
- return {qr,qrDurationMs,ocr,ocrError,parsed,durationMs:Math.round(performance.now()-started),source:qr.status==='wifi'?(parsed.qrAgreement?'qr+ocr':'qr'):'ocr'};
+ const qrHasPassword=Boolean(qr.status==='wifi'&&qr.password),password=parsed.password;
+ const passwordSource=password?.source?.startsWith('qr')?(password.source==='qr+ocr'?'QR + OCR':'QR'):password?.sourcePasses?.length>1?'OCR A + B':password?.sourcePasses?.[0]?.pass==='grayscale-contrast'?'OCR B':password?.sourcePasses?.[0]?'OCR A':password?'OCR fusionado':'ninguno';
+ const diagnostics={blob:{type:blob.type,size:blob.size},qr:{found:qr.status==='wifi',wifiPayloadValid:qr.status==='wifi',hasSsid:Boolean(qr.ssid),hasPassword:qrHasPassword,source:qr.source||null,durationMs:qrDurationMs},ocrPasses:passDiagnostics(ocr),fusion:{passwordCandidateCount:parsed.passwordCandidates?.length||0,passwordDetected:Boolean(password),passwordSource,passwordLength:password?.value?.length||0,qrOcrConflict:Boolean(parsed.warnings?.some(item=>/QR Wi-Fi y el texto OCR no coinciden/i.test(item))),ssidCandidateCount:parsed.ssidCandidates?.length||0},image:ocr.image?{sourceWidth:ocr.image.sourceWidth??null,sourceHeight:ocr.image.sourceHeight??null,processedWidth:ocr.image.processedWidth??null,processedHeight:ocr.image.processedHeight??null,orientationNormalized:ocr.image.orientationNormalized??null}:null};
+ return {qr,qrDurationMs,ocr,ocrError,parsed,diagnostics,durationMs:Math.round(performance.now()-started),source:qr.status==='wifi'?(parsed.qrAgreement?'qr+ocr':'qr'):'ocr'};
 }
 
 

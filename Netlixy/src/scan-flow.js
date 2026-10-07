@@ -8,12 +8,13 @@ export function buildScanPlan(parsed,{selectedCandidate=null}={}){
  const primary=selectedCandidate||candidates.find(candidate=>candidate.value===parsed?.ssid?.value)||candidates[0]||parsed?.ssid;
  if(!primary){if(!parsed?.password)return {state:'error',choices:[]};return {state:'review',choices:[],candidate:null,fields:['ssid']};}
  const sourceConflict=(parsed?.warnings||[]).some(warning=>/QR Wi-Fi y el texto OCR no coinciden|conflicto/i.test(warning));
+ const qrTrusted=candidate=>candidate?.source?.startsWith('qr')&&!sourceConflict;
  const taggedOcrCandidate=(candidate,field)=>candidate?.score>=90&&candidate?.source!=='qr'&&new RegExp(`Etiqueta ${field==='ssid'?'SSID':'de contraseña Wi-Fi'}`,'i').test(candidate?.reason||'');
  const highConfidenceTaggedOcr=taggedOcrCandidate(primary,'ssid')||primary?.corrected&&primary.correctionConfidence==='high'&&Number(primary.correctionScore)>=7;
  const highConfidencePassword=taggedOcrCandidate(parsed?.password,'password');
  const trustedProposal=primary.corrected&&primary.correctionConfidence==='high'&&Number(primary.correctionScore)>=7;
- const ssidNeedsReview=Boolean(sourceConflict||primary.needsReview&&!primary.qrAgreement&&!highConfidenceTaggedOcr&&!trustedProposal);
- const passwordNeedsReview=parsed?.security?.value!=='Sin contraseña'&&(!parsed?.password||sourceConflict||parsed.password.needsReview&&!parsed.password.qrAgreement&&!highConfidencePassword);
+ const ssidNeedsReview=Boolean(sourceConflict||primary.needsReview&&!primary.qrAgreement&&!qrTrusted(primary)&&!highConfidenceTaggedOcr&&!trustedProposal);
+ const passwordNeedsReview=parsed?.security?.value!=='Sin contraseña'&&(!parsed?.password||sourceConflict||parsed.password.needsReview&&!parsed.password.qrAgreement&&!qrTrusted(parsed.password)&&!highConfidencePassword);
  const fields=[...(ssidNeedsReview?['ssid']:[]),...(passwordNeedsReview?['password']:[])];
  if(fields.length)return {state:'review',choices:[primary],candidate:primary,fields};
  return {state:'ready',choices:[primary],candidate:primary,fields:[]};
