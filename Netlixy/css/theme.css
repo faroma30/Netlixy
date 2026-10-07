@@ -393,6 +393,12 @@ body { min-height:100dvh;background:radial-gradient(ellipse at 50% 12%,#071a30 0
   .bottom-nav .nav-scan { width:52px;height:52px; }
 }
 @media (max-width:649px) {
+  .bottom-nav { position:fixed; }
+  .bottom-nav { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .bottom-nav [data-tab="home"] { grid-column:1; }
+  .bottom-nav [data-tab="recent"] { grid-column:2; }
+  .bottom-nav [data-tab="settings"] { grid-column:3; }
+  .bottom-nav .nav-scan { position:absolute;left:50%;top:calc((100% - env(safe-area-inset-bottom))/2);transform:translate(-50%,-50%);z-index:1; }
   .home-screen { min-height:0;display:block; }
   .home-recent { margin-top:17px;padding-top:0; }
 }
