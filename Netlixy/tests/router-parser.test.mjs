@@ -40,4 +40,11 @@ const numeric=parse('SSID: CASA\nWiFi Password: 12345678\nWPA2');
 assert.equal(numeric.password.value,'12345678','una contraseña numérica no se descarta si lleva una etiqueta Wi-Fi explícita');
 const ambiguous=parse('SSID: CASA\nSSID: CASA_5G\nWPA2');
 assert.deepEqual(ambiguous.ssidCandidates.filter(c=>c.score>=70).map(c=>c.value),['CASA','CASA_5G']);
-console.log('PASS parser fixtures: diez casos solicitados + Unicode, símbolos, etiquetas flexibles, candidatos múltiples y confianza explicable.');
+const huaweiText='username:root\npassword:adminHW\nSSID1:HUAWEI-2.4G-28bi\nSSID2:HUAWEI-5G-28bi\nWLAN Key: dab918ck';
+const huawei=parse(huaweiText);
+assert.deepEqual(huawei.ssidCandidates.filter(c=>c.score>=70).map(c=>c.value),['HUAWEI-2.4G-28bi','HUAWEI-5G-28bi'],'Huawei dual-band SSIDs stay independently selectable');
+assert.equal(huawei.password.value,'dab918ck');assert.deepEqual(huawei.passwordCandidates.map(c=>c.value),['dab918ck']);assert.ok(huawei.excludedCandidates.some(c=>c.value==='adminHW'&&c.reason.includes('administrativa')));assert.equal(huawei.security.value,'WPA/WPA2');assert.equal(huawei.security.inferred,true);assert.equal(huawei.operator.detected,null,'Huawei is the manufacturer, not an inferred operator');
+for(const label of ['SSID1','SSID 1','SSID2','SSID 2','SSIDI','SSIDl']){const candidates=parse(`${label}: RED_PRUEBA_24`).ssidCandidates;assert.equal(candidates.length,1,`${label} is accepted as an OCR-tolerant SSID label`);}
+for(const label of ['WLAN Key','WLAN KEY','WLANKey','WLAN Kev','WLAN Key:']){const result=parse(`${label}: Clave_Exacta123`);assert.equal(result.password.value,'Clave_Exacta123',`${label} is a high-confidence Wi-Fi password label`);}
+for(const text of ['username:root\npassword:adminHW\nWLAN Key: dab918ck','username:admin\npassword:adminHW\nWLAN Key: dab918ck','username:root\npassword:adminHW\nSSID: CASA_WIFI']){const result=parse(text);assert.ok(!result.passwordCandidates.some(c=>c.value==='adminHW'),'generic password following username/root/admin is excluded from Wi-Fi credentials');}
+console.log('PASS parser fixtures: generic regressions, symbols, dual SSIDs, WLAN Key OCR variants, admin credential exclusion and unknown operator.');

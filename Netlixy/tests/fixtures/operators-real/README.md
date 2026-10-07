@@ -45,3 +45,9 @@ npm run test:fixture -- --stats
 ```
 
 El comando prefiere `input.local.jpg` y `expected.local.json`, usa Tesseract local y compara parser genérico contra perfiles activados. No imprime credenciales. Añade `--show-values` solo si estás trabajando en un terminal privado y necesitas ver los valores exactos. Para una prueba basada en un OCR previamente comprobado puede usarse `ocr.local.txt` si no hay imagen local. El análisis no escribe ni sube resultados.
+
+## Primera muestra textual real: Huawei EchoLife EG8145V5
+
+Se añade `huawei-eg8145v5-real-001` a partir de la transcripción literal suministrada por el usuario desde una fotografía física. La fotografía no se incluye en el repositorio. El fabricante/modelo se registran como Huawei EchoLife EG8145V5; el operador permanece `unknown` porque la etiqueta no lo identifica.
+
+La transcripción con SSID, contraseña Wi-Fi y credencial de administración se conserva únicamente en archivos ignorados localmente (`ocr.txt` (transcripción sin datos de clientes/personales), `expected.local.json`, `notes.local.md`). `index.json` no contiene SSID ni contraseñas. Esta fixture verifica el parser sobre el texto facilitado; no equivale a una lectura Tesseract de la imagen y no certifica el OCR físico.

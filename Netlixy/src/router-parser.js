@@ -2,14 +2,14 @@ import {detectOperator} from './operator-detector.js';
 import {getOperatorProfile} from './operator-profiles/index.js';
 
 const SSID_LABELS = [
-  [/^(?:ssid|ss[i1l]d)(?:\s+(?:2[.,]?4\s*(?:ghz|g)?|5\s*(?:ghz|g)?))?$/, 100, 'Etiqueta SSID'],
+  [/^(?:ssid|ss[i1l]d)(?:\s*(?:[12]|[il])|\s+(?:2[.,]?4\s*(?:ghz|g)?|5\s*(?:ghz|g)?))?$/, 100, 'Etiqueta SSID'],
   [/^(?:wi[ -]?fi|wlan)\s*(?:name|nombre)$/, 92, 'Etiqueta de nombre Wi-Fi'],
   [/^(?:wi[ -]?fi|wlan)$/, 78, 'Etiqueta Wi-Fi/WLAN'],
   [/^(?:wireless|network)\s+name$/, 88, 'Etiqueta de nombre de red'],
   [/^(?:nombre\s+(?:de\s+)?(?:wi[ -]?fi|red)|red\s+(?:wi[ -]?fi|wlan))$/, 90, 'Etiqueta de nombre de red']
 ];
 const PASSWORD_LABELS = [
-  [/^(?:wi[ -]?fi|wlan)\s+(?:password|passvvord|passw[o0]rd|key|clave|contrase[nñ]a)$/, 100, 'Etiqueta de contraseña Wi-Fi'],
+  [/^(?:wi[ -]?fi|wlan)\s*(?:password|passvvord|passw[o0]rd|key|kev|clave|contrase[nñ]a)$/, 100, 'Etiqueta de contraseña Wi-Fi'],
   [/^(?:wpa\s*[- ]?psk|wpa[23]?\s*[- ]?(?:key|clave)|pre[ -]?shared\s+key|psk)$/, 98, 'Etiqueta de clave WPA/PSK'],
   [/^(?:wireless|network)\s+(?:key|password|clave|contrase[nñ]a)$/, 94, 'Etiqueta de clave de red'],
   [/^(?:clave\s+(?:de\s+)?(?:wi[ -]?fi|wlan|red)|contrase[nñ]a\s+(?:de\s+)?(?:wi[ -]?fi|wlan|red))$/, 98, 'Etiqueta de contraseña de red'],
@@ -22,7 +22,7 @@ const cleanCandidate = value => String(value || '').replace(/^\s*[:=\-–—]\s*
 const isMac = value => /^(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}$/i.test(value.replace(/\s/g, '')) || /^(?:[0-9a-f]{4}[.]){2}[0-9a-f]{4}$/i.test(value);
 const isIpOrNumericPin = value => /^(?:\d{1,3}\.){3}\d{1,3}$/.test(value) || /^\d{4,10}$/.test(value);
 const isSerialContext = label => /^(?:s\/?n|sn|serial(?:\s+number)?|serial number)$/i.test(label);
-const isAdminContext = label => /\b(?:admin|administrator|web|router|login)\b/.test(label) && /\b(?:password|pass|key|credential|contrase[nñ]a|clave|pin)\b/.test(label) || /^(?:admin|administrator|web|login)$/i.test(label);
+const isAdminContext = (label, lines, index) => (/\b(?:admin|administrator|web|router|login)\b/.test(label) && /\b(?:password|pass|key|credential|contrase[nñ]a|clave|pin)\b/.test(label)) || /^(?:admin|administrator|web|login)$/i.test(label) || (/^(?:password|passvvord|passw[o0]rd|contrase[nñ]a|clave)$/i.test(label) && /^(?:username|user name|user|login|account|usuario)\s*[:=]/i.test(lines[index-1] || ""));
 const isWpsContext = label => /\bwps\b/.test(label);
 const plausible = (value, allowNumericPin = false) => value.length > 0 && value.length <= 2048 && !isMac(value) && (!isIpOrNumericPin(value) || (allowNumericPin && /^\d{4,10}$/.test(value))) && !/^https?:\/\//i.test(value);
 
@@ -78,8 +78,8 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
     const ssidLabel = findLabel(label, SSID_LABELS);
     const passwordLabel = findLabel(label, PASSWORD_LABELS);
 
-    if (isSerialContext(normalizedLabel) || /^mac(?:\s+address)?$/i.test(normalizedLabel) || isWpsContext(normalizedLabel) || isAdminContext(normalizedLabel)) {
-      if (value) excluded.push({ value, sourceLine: line, reason: isWpsContext(normalizedLabel) ? 'WPS PIN excluido' : isAdminContext(normalizedLabel) ? 'Credencial administrativa excluida' : 'Identificador excluido' });
+    if (isSerialContext(normalizedLabel) || /^mac(?:\s+address)?$/i.test(normalizedLabel) || isWpsContext(normalizedLabel) || isAdminContext(normalizedLabel, lines, index)) {
+      if (value) excluded.push({ value, sourceLine: line, reason: isWpsContext(normalizedLabel) ? 'WPS PIN excluido' : isAdminContext(normalizedLabel, lines, index) ? 'Credencial administrativa excluida' : 'Identificador excluido' });
       else if (lines[index + 1]) excludedValueLines.add(index + 1);
       return;
     }
@@ -142,7 +142,7 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
   if (!ssid) warnings.push('No se ha podido identificar el nombre Wi-Fi.');
   if (!password && security.value !== 'Sin contraseña') warnings.push('No se ha podido identificar la contraseña Wi-Fi.');
   if (security.inferred) warnings.push('La seguridad no aparece en el texto; se propone WPA/WPA2 por defecto.');
-  return { ssid, password, security, ssidCandidates, passwordCandidates, excludedCandidates: excluded, warnings, operator, appliedProfiles, profileDiagnostics, parserVersion: '2.0-generic+profiles' };
+  return { ssid, password, security, ssidCandidates, passwordCandidates, excludedCandidates: excluded, warnings, operator, appliedProfiles, profileDiagnostics, parserVersion: '2.1-generic+profiles' };
 }
 
 function detectSecurity(lines) {

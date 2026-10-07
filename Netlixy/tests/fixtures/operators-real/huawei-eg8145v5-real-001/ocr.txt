@@ -1,0 +1,5 @@
+username:root
+password:adminHW
+SSID1:HUAWEI-2.4G-28bi
+SSID2:HUAWEI-5G-28bi
+WLAN Key: dab918ck

@@ -1,4 +1,26 @@
 {
   "version": 1,
-  "samples": []
+  "samples": [
+    {
+      "parserCorrect": true,
+      "operator": "unknown",
+      "status": "reviewed",
+      "notes": "En la prueba inicial, la app no presentó correctamente ambos SSID ni distinguió la clave WLAN de la credencial admin. Texto OCR literal pendiente de comprobar con foto.",
+      "source": "real-photo-text-transcription",
+      "ssidCorrect": true,
+      "ocrCorrect": null,
+      "operatorCorrect": true,
+      "failureCategories": [
+        "parser.ssid_not_detected",
+        "parser.password_not_detected",
+        "parser.admin_credential_exclusion"
+      ],
+      "id": "huawei-eg8145v5-real-001",
+      "model": "EchoLife EG8145V5",
+      "manufacturer": "Huawei",
+      "manualCorrection": true,
+      "passwordCorrect": true,
+      "securityCorrect": true
+    }
+  ]
 }

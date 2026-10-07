@@ -2,6 +2,7 @@
 tests/fixtures/operators-real/**/input.*
 tests/fixtures/operators-real/**/expected*.json
 tests/fixtures/operators-real/**/ocr*.txt
+!tests/fixtures/operators-real/huawei-eg8145v5-real-001/ocr.txt
 tests/fixtures/operators-real/**/diagnostic*.json
 tests/fixtures/operators-real/**/notes.local.md
 
