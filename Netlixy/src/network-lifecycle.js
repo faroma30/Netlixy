@@ -6,7 +6,7 @@ export function migrateLegacyNetwork(network){
 }
 
 export function sameNetworkIdentity(a,b){
-  return String(a?.ssid||'').trim().toLocaleLowerCase()===String(b?.ssid||'').trim().toLocaleLowerCase()
+  return String(a?.ssid||'').trim()===String(b?.ssid||'').trim()
     &&String(a?.security||'WPA/WPA2')===String(b?.security||'WPA/WPA2');
 }
 

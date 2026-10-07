@@ -23,7 +23,7 @@ const touched=renewRecentRecord(recent,start+43*60*60*1000);
 assert.equal(Date.parse(touched.expiresAt)-Date.parse(touched.lastUsedAt),RECENT_TTL_MS,'use renews a full 48 hours');
 assert.equal(Date.parse(touched.expiresAt),start+91*60*60*1000);
 assert.equal(touched.id,recent.id);
-assert.equal(sameNetworkIdentity(recent,{ssid:'casa',security:'WPA/WPA2'}),true,'SSID match is case insensitive');
+assert.equal(sameNetworkIdentity(recent,{ssid:'casa',security:'WPA/WPA2'}),false,'SSID matching preserves case because SSIDs may differ by case');
 assert.equal(sameNetworkIdentity(recent,{ssid:'Casa',security:'WPA3'}),false,'security participates in the duplicate key');
 
 const refreshed=createRecentRecord({ssid:'Casa',password:'ClaveNueva',security:'WPA/WPA2',note:''},{existing:recent,now:start+1000});
