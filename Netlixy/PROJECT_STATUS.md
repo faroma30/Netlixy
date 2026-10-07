@@ -413,3 +413,17 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟡 PWA instalada pendiente de comprobar en iPhone.
 - 🟡 Nombre antiguo de repositorio/URL mantenido temporalmente por compatibilidad: `faroma30/Netlixy`, `/Netlixy/`.
 - ⚪ IndexedDB y sus identificadores internos se conservan sin migración; el nombre heredado del proyecto/paquete también se mantiene como identificador técnico.
+
+## FASE 2 — Recientes / Guardadas (2026-10-07)
+
+- 🟢 Modelo IndexedDB versión 2: los registros antiguos se recorren durante la actualización y se marcan como `saved`, conservando identificador, credenciales, nota y fechas.
+- 🟢 Recientes se crean tras confirmar datos del escáner/OCR y al generar manualmente un QR; caducan a las 48 horas exactas desde `lastUsedAt`.
+- 🟢 Abrir el detalle, volver a mostrar el QR o copiar la contraseña renueva las 48 horas; la lista no renueva el plazo.
+- 🟢 Dedupe temporal por SSID y seguridad; una revisión actualiza el registro reciente existente. Las credenciales guardadas no se modifican al detectar otra contraseña.
+- 🟢 Guardar promueve el reciente existente. Si ya hay una red guardada con otras credenciales, la interfaz pide confirmación antes de reemplazarlas y conserva una sola entrada guardada.
+- 🟢 Redes muestra pestañas independientes Recientes y Guardadas, accesibles desde Inicio. Borrar recientes y borrar guardadas son acciones separadas.
+- 🟢 La limpieza de caducadas se ejecuta al iniciar la aplicación y al acceder a las listas/datos, sin procesos en segundo plano.
+- 🟢 Pruebas con reloj inyectado: 47 h 59 min permanece; 48 h 01 min se elimina. Cubren CRUD IndexedDB simulado, migración desde versión 1, duplicados, renovación, promoción, conflictos y borrado por categoría.
+- 🟢 `APP_VERSION` actualizado a `V1.15.0`; caché Service Worker a `wifi-connect-v1.15.0`, con limpieza compatible `wifi-connect-*`/`netlixy-*`.
+- 🟡 Validación física en iPhone pendiente.
+- ⚪ Validación física en Android pendiente.
