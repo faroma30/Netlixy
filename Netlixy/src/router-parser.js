@@ -189,8 +189,10 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
     const ocrSecurity=detectSecurity(lines);
     const ssidMatch=ocrSsid.find(candidate=>candidate.value===qr.ssid);
     const passwordMatch=qr.password?ocrPasswords.find(candidate=>candidate.value===qr.password):null;
-    const ssidConflict=ocrSsid.some(candidate=>candidate.score>=70&&candidate.value!==qr.ssid);
-    const passwordConflict=qr.password&&ocrPasswords.some(candidate=>candidate.score>=70&&candidate.value!==qr.password);
+    const passRecords=Array.isArray(input?.passes)?input.passes:[];
+    const corroboratedDisagreement=(candidate,fieldValue)=>candidate.value!==fieldValue&&candidate.score>=70&&passRecords.filter(pass=>String(pass.normalizedText||'').split(/\r?\n/).some(source=>source.trim()===candidate.sourceLine)).length>1;
+    const ssidConflict=ocrSsid.some(candidate=>candidate.value!==qr.ssid&&(!ssidMatch||corroboratedDisagreement(candidate,qr.ssid)));
+    const passwordConflict=qr.password&&ocrPasswords.some(candidate=>candidate.value!==qr.password&&(!passwordMatch||corroboratedDisagreement(candidate,qr.password)));
     qrSecurityConflict=Boolean(qr.security&&!ocrSecurity.inferred&&qr.security!==ocrSecurity.value);
     qrConflict=Boolean(ssidConflict||passwordConflict||qrSecurityConflict);
     qrAgreement=Boolean(ssidMatch&&(!qr.password||passwordMatch)&&!qrSecurityConflict);

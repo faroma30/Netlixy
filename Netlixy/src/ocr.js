@@ -10,7 +10,7 @@ function abortError(){const error=new Error('OCR cancelado.');error.name='AbortE
 function waitFor(promise,signal){if(!signal)return promise;if(signal.aborted)return Promise.reject(abortError());return new Promise((resolve,reject)=>{const onAbort=()=>reject(abortError());signal.addEventListener('abort',onAbort,{once:true});promise.then(value=>{signal.removeEventListener('abort',onAbort);resolve(value);},error=>{signal.removeEventListener('abort',onAbort);reject(error);});});}
 const defaultPaths=()=>({workerPath:new URL('../vendor/tesseract/core/worker.min.js',import.meta.url).href,corePath:new URL('../vendor/tesseract/core/',import.meta.url).href,langPath:new URL('../vendor/tesseract/lang',import.meta.url).href});
 export function createOcrService({loadEngine=()=>import('../vendor/tesseract/tesseract.esm.min.js'),preprocess=prepareImageForOcr,paths=defaultPaths}={}){
- return async function recognizeRouterLabel(blob,{signal,onProgress=()=>{},onStage=()=>{}}={}){
+ return async function recognizeRouterLabel(blob,{signal,onProgress=()=>{},onStage=()=>{},qrResult=null}={}){
   if(!blob||typeof blob.arrayBuffer!=='function'||!String(blob.type||'').startsWith('image/')||!blob.size)throw new TypeError('Selecciona una fotografía válida para analizar.');
   const started=performance.now();let worker=null,workerPromise=null,terminated=false,prepared=null,alternatePrepared=null,abortHandler=null;
   const terminate=async target=>{if(!target||terminated)return;terminated=true;try{await target.terminate();}catch{}};
@@ -31,7 +31,11 @@ export function createOcrService({loadEngine=()=>import('../vendor/tesseract/tes
    const expectedBands=new Set([...firstNormalized.matchAll(/(?:^|[^\p{L}\p{N}])SS[i1l]D\s*([12]|[il])\b/giu)].map(match=>String(match[1]).toLowerCase().replace(/[il]/,'1')));
    const parsedBands=new Set(initialParse.ssidCandidates.map(candidate=>String(candidate.sourceLine).match(/(?:^|[^\p{L}\p{N}])SS[i1l]D\s*([12]|[il])\b/i)?.[1]?.toLowerCase().replace(/[il]/,'1')).filter(Boolean));
    const missingExpectedBand=[...expectedBands].some(band=>!parsedBands.has(band));
-   const weak=firstConfidence===null||firstConfidence<72||!initialParse.ssidCandidates.some(candidate=>candidate.score>=60)||!initialParse.passwordCandidates.some(candidate=>candidate.score>=60)||missingExpectedBand;
+   const qrCoversWifi=qrResult?.status==='wifi'&&Boolean(qrResult.ssid)&&(qrResult.security==='Sin contraseña'||Boolean(qrResult.password));
+   const firstMatchesQr=qrCoversWifi&&initialParse.ssidCandidates.some(candidate=>candidate.value===qrResult.ssid);
+   const hasBandLabels=expectedBands.size>0;
+   const qrCanSkipAlternate=qrCoversWifi&&firstMatchesQr&&!hasBandLabels;
+   const weak=!qrCanSkipAlternate&&(firstConfidence===null||firstConfidence<72||!initialParse.ssidCandidates.some(candidate=>candidate.score>=60)||!initialParse.passwordCandidates.some(candidate=>candidate.score>=60)||missingExpectedBand);
    if(weak){
     throwIfAborted(signal);onStage('Mejorando lectura');const alternateStarted=performance.now();
     try{
