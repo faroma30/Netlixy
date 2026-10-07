@@ -1,12 +1,12 @@
 import {isValidationAccessAllowed} from './config.js';
-export const APP_VERSION='V1.15.0';
+export const APP_VERSION='V1.16.0';
 export const VALIDATION_SECTIONS=[
  {id:'safari',title:'Safari',tests:['Abrir aplicación en Safari','Navegación Inicio / Recientes / Ajustes','Generar QR manual','Guardar red','Añadir nota','Editar nota','Cerrar Safari y volver a abrir','Persistencia IndexedDB']},
  {id:'camera',title:'Cámara',tests:['Solicitar permiso','Cámara trasera','Preview correcta','Capturar fotografía','Repetir fotografía','Confirmar fotografía','Abandonar pantalla detiene cámara']},
  {id:'photos',title:'Fotos',tests:['Seleccionar foto desde galería','Foto vertical','Foto horizontal','Orientación correcta']},
  {id:'ocr',title:'OCR',tests:['Iniciar OCR','Mostrar progreso','Cancelar OCR','Repetir OCR','Obtener texto real','Revisar resultado']},
  {id:'parser',title:'Parser',tests:['Detectar SSID','Detectar contraseña','Detectar seguridad','Mostrar varios candidatos si existen','Corrección manual']},
- {id:'qr-final',title:'QR final',tests:['Generar QR tras revisión','Visualizar QR correctamente','Compartir QR','Escanear QR con otro teléfono','Conexión real a Wi-Fi']},
+ {id:'qr-final',title:'QR final',tests:['Red detectada tras revisar los datos','Copiar contraseña de una red reciente','Mostrar QR desde Red detectada','Promover reciente a Guardadas','Guardar nota en reciente sin hacerla permanente','Volver desde QR a Red detectada','Visualizar QR correctamente','Compartir QR','Escanear QR con otro teléfono','Conexión real a Wi-Fi']},
  {id:'pwa',title:'PWA instalada',tests:['Añadir a pantalla de inicio','Abrir en modo standalone','Navegación correcta','Cámara desde PWA','OCR desde PWA','IndexedDB persistente']},
  {id:'offline',title:'Offline',tests:['Abrir PWA sin Internet','Navegación offline','Generar QR offline','Abrir redes recientes offline','OCR offline después de haber descargado recursos']},
 ];

@@ -427,3 +427,15 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 `APP_VERSION` actualizado a `V1.15.0`; caché Service Worker a `wifi-connect-v1.15.0`, con limpieza compatible `wifi-connect-*`/`netlixy-*`.
 - 🟡 Validación física en iPhone pendiente.
 - ⚪ Validación física en Android pendiente.
+
+## FASE 3 — Red detectada (2026-10-07)
+
+- 🟢 Revisión humana de SSID, contraseña y seguridad sigue siendo obligatoria; al confirmar, la red aparece en Recientes o reutiliza la ya guardada.
+- 🟢 El detalle compartido muestra Red detectada, contraseña oculta, Copiar contraseña, Mostrar QR, copiar SSID, nota editable y el tiempo restante.
+- 🟢 Copiar contraseña, abrir el detalle y Mostrar QR renuevan las 48 horas de Recientes; las notas se escriben en el registro sin promoverlo.
+- 🟢 Guardar promueve el registro temporal existente y quita la caducidad; conserva la nota. El conflicto de contraseña con una red Guardada solicita confirmación antes de usar la credencial guardada o mantener la recién revisada como Reciente.
+- 🟢 QR usa el motor actual y vuelve a Red detectada al abrirse desde el detalle.
+- 🟢 Detalle reutilizado desde Recientes y Guardadas; las redes permanentes no se duplican cuando se reconocen sus credenciales actuales.
+- 🟢 `APP_VERSION` actualizado a `V1.16.0`; Service Worker a `wifi-connect-v1.16.0`, conservando la limpieza de cachés antiguas.
+- 🟡 Validación física en iPhone pendiente.
+- ⚪ Validación física en Android pendiente.
