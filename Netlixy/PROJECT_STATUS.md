@@ -374,3 +374,14 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟡 PWA instalada pendiente de revisar.
 - ⚪ Ajustes finales tras uso real pendientes.
 - ⚪ Ninguna prueba física se marca como realizada.
+## UI / Corrección según Estilo.png (2026-10-07)
+
+- 🟢 Referencia `Estilo.png` inspeccionada directamente; usada para composición, contraste, iconografía, proporción y navegación.
+- 🟢 Inicio recompuesto con marca Wi-Fi centrada, escaneo principal ancho, cuadrícula de cuatro accesos funcionales y filas recientes compactas.
+- 🟢 Formulario de Mi red/Generar QR con cabecera centrada, controles oscuros, iconos lineales y acción principal azul luminosa.
+- 🟢 QR generado con marco claro, datos centrados, acciones Guardar/Compartir/Copiar y confirmación verde discreta.
+- 🟢 Ajustes agrupados y navegación inferior con acción central conectada al escaneo de router.
+- 🟡 Validación visual física en iPhone pendiente.
+- 🟡 Revisión de PWA instalada pendiente.
+- ⚪ Ajustes finales tras uso real pendientes.
+- ⚪ Ninguna prueba física se marca como realizada.
