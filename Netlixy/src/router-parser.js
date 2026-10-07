@@ -9,11 +9,11 @@ const SSID_LABELS = [
   [/^(?:nombre\s+(?:de\s+)?(?:wi[ -]?fi|red)|red\s+(?:wi[ -]?fi|wlan))$/, 90, 'Etiqueta de nombre de red']
 ];
 const PASSWORD_LABELS = [
-  [/^(?:wi[ -]?fi|wlan)\s*(?:password|passvvord|passw[o0]rd|key|kev|clave|contrase[nñ]a)$/, 100, 'Etiqueta de contraseña Wi-Fi'],
+  [/^(?:wi[ -]?fi|wlan)\s*(?:password|passvvord|passw[o0]rd|key|kev|kcy|clave|contrase[nñ]a)$/, 100, 'Etiqueta de contraseña Wi-Fi'],
   [/^(?:wpa\s*[- ]?psk|wpa[23]?\s*[- ]?(?:key|clave)|pre[ -]?shared\s+key|psk)$/, 98, 'Etiqueta de clave WPA/PSK'],
   [/^(?:wireless|network)\s+(?:key|password|clave|contrase[nñ]a)$/, 94, 'Etiqueta de clave de red'],
   [/^(?:clave\s+(?:de\s+)?(?:wi[ -]?fi|wlan|red)|contrase[nñ]a\s+(?:de\s+)?(?:wi[ -]?fi|wlan|red))$/, 98, 'Etiqueta de contraseña de red'],
-  [/^(?:password|passvvord|passw[o0]rd|contrase[nñ]a|clave)$/, 82, 'Etiqueta genérica de contraseña'],
+  [/^(?:password|passvvord|passw[o0]rd|contrase[nñ]a|clave)$/, 52, 'Etiqueta genérica de contraseña'],
   [/^key$/, 58, 'Etiqueta genérica Key con contexto Wi-Fi']
 ];
 
@@ -22,7 +22,14 @@ const cleanCandidate = value => String(value || '').replace(/^\s*[:=\-–—]\s*
 const isMac = value => /^(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}$/i.test(value.replace(/\s/g, '')) || /^(?:[0-9a-f]{4}[.]){2}[0-9a-f]{4}$/i.test(value);
 const isIpOrNumericPin = value => /^(?:\d{1,3}\.){3}\d{1,3}$/.test(value) || /^\d{4,10}$/.test(value);
 const isSerialContext = label => /^(?:s\/?n|sn|serial(?:\s+number)?|serial number)$/i.test(label);
-const isAdminContext = (label, lines, index) => (/\b(?:admin|administrator|web|router|login)\b/.test(label) && /\b(?:password|pass|key|credential|contrase[nñ]a|clave|pin)\b/.test(label)) || /^(?:admin|administrator|web|login)$/i.test(label) || (/^(?:password|passvvord|passw[o0]rd|contrase[nñ]a|clave)$/i.test(label) && /^(?:username|user name|user|login|account|usuario)\s*[:=]/i.test(lines[index-1] || ""));
+const isAdminContext = (label, lines, index) => {
+ if ((/\b(?:admin|administrator|web|router|login)\b/.test(label) && /\b(?:password|pass|key|credential|contrase[nñ]a|clave|pin)\b/.test(label)) || /^(?:admin|administrator|web|login)$/i.test(label)) return true;
+ if (!/^(?:password|passvvord|passw[o0]rd|contrase[nñ]a|clave)$/i.test(label)) return false;
+ const context=lines.slice(Math.max(0,index-4),index).join(' ');
+ const userContext=/^(?:username|user name|user|login|account|usuario)\s*[:=]/i.test(lines[index-1]||'')||/\b(?:username|user\s*name|1semame|usename|root|admin|login)\b/i.test(context);
+ const managementIp=/\bIP\b[^\n]{0,48}\b192[. ]+168[. ]+100[. ]+1\b/i.test(context);
+ return userContext || (managementIp && /\badmin/i.test(splitLabel(lines[index])[1]||''));
+};
 const isWpsContext = label => /\bwps\b/.test(label);
 const plausible = (value, allowNumericPin = false) => value.length > 0 && value.length <= 2048 && !isMac(value) && (!isIpOrNumericPin(value) || (allowNumericPin && /^\d{4,10}$/.test(value))) && !/^https?:\/\//i.test(value);
 
@@ -35,6 +42,13 @@ function splitLabel(line) {
   if (!match) return { label: line.trim(), value: '' };
   return { label: match[1].trim(), value: match[2].trim() };
 }
+function embeddedWlanKey(line){
+ if(String(line).length>180)return null;
+ const match=String(line).match(/(?:^|[^\p{L}\p{N}])WLAN\s*K(?:ey|ev|cy)\s*(?::|=|：|＝|[’'`])\s*(.*?)\s*$/iu);
+ if(!match)return null;
+ return {label:'WLAN Key',value:match[1].trim(),delimiter:/[:=：＝]/.test(match[0])};
+}
+function ssidBand(sourceLine){const match=String(sourceLine).match(/(?:^|[^\p{L}\p{N}])SS[i1l]D\s*([12]|[il])\b/i);return match?String(match[1]).toLowerCase().replace(/[il]/,'1'):null;}
 function scoreValue(value, base, kind) {
   let score = base;
   if (!value) return score;
@@ -73,10 +87,13 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
 
   lines.forEach((line, index) => {
     if (excludedValueLines.has(index)) { excluded.push({ value: line, sourceLine: lines[index - 1] || line, reason: 'Valor de identificador/credencial excluida' }); return; }
-    const { label, value } = splitLabel(line);
+    const embeddedKey=embeddedWlanKey(line);
+    const split=splitLabel(line);
+    const { label, value } = embeddedKey||split;
     const normalizedLabel = normalizeLabel(label);
     const ssidLabel = findLabel(label, SSID_LABELS);
-    const passwordLabel = findLabel(label, PASSWORD_LABELS);
+    let passwordLabel = findLabel(label, PASSWORD_LABELS);
+    if(embeddedKey&&passwordLabel&&!embeddedKey.delimiter)passwordLabel=[passwordLabel[0],Math.min(passwordLabel[1],50),passwordLabel[2]];
 
     if (isSerialContext(normalizedLabel) || /^mac(?:\s+address)?$/i.test(normalizedLabel) || isWpsContext(normalizedLabel) || isAdminContext(normalizedLabel, lines, index)) {
       if (value) excluded.push({ value, sourceLine: line, reason: isWpsContext(normalizedLabel) ? 'WPS PIN excluido' : isAdminContext(normalizedLabel, lines, index) ? 'Credencial administrativa excluida' : 'Identificador excluido' });
@@ -138,6 +155,16 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
   const ssid = ssidCandidates[0] ? { ...ssidCandidates[0], confidence: Math.min(1, ssidCandidates[0].score / 100) } : null;
   const password = passwordCandidates[0] ? { ...passwordCandidates[0], confidence: Math.min(1, passwordCandidates[0].score / 100) } : null;
   const warnings = [];
+  const passRecords=Array.isArray(input?.passes)?input.passes:[];
+  for(const candidate of [...ssidCandidates,...passwordCandidates]){
+    const sources=passRecords.filter(pass=>String(pass.normalizedText||'').split(/\r?\n/).some(source=>source.trim()===candidate.sourceLine)).map(pass=>({pass:pass.id,text:candidate.sourceLine,score:Number.isFinite(pass.confidence)?pass.confidence:null}));
+    if(sources.length){candidate.sourcePasses=sources;candidate.ocrScore=Math.max(...sources.map(item=>item.score??0));candidate.sourceText=candidate.sourceLine;if(candidate.ocrScore<72)candidate.needsReview=true;}
+  }
+  if(ssid&&ssidCandidates[0])Object.assign(ssid,ssidCandidates[0],{confidence:Math.min(1,ssidCandidates[0].score/100)});
+  if(password&&passwordCandidates[0])Object.assign(password,passwordCandidates[0],{confidence:Math.min(1,passwordCandidates[0].score/100)});
+  const bandCandidates=new Map();
+  for(const candidate of ssidCandidates){const band=ssidBand(candidate.sourceLine);if(band){const items=bandCandidates.get(band)||[];items.push(candidate);bandCandidates.set(band,items);}}
+  for(const candidates of bandCandidates.values())if(new Set(candidates.map(candidate=>candidate.value)).size>1)for(const candidate of candidates)candidate.needsReview=true;
   if (ssidCandidates.filter(c => c.score >= 70).length > 1) warnings.push('Se han encontrado varios SSID; selecciona el correcto.');
   if (!ssid) warnings.push('No se ha podido identificar el nombre Wi-Fi.');
   if (!password && security.value !== 'Sin contraseña') warnings.push('No se ha podido identificar la contraseña Wi-Fi.');

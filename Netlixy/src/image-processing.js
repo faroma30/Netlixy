@@ -17,7 +17,7 @@ async function decodeBlob(blob,urlApi,signal){
   throwIfAborted(signal);return {image,close:false};
  }finally{urlApi.revokeObjectURL(url);}
 }
-export async function prepareImageForOcr(blob,{signal,maxDimension=MAX_OCR_DIMENSION,previewMaxDimension=PREVIEW_MAX_DIMENSION,urlApi=globalThis.URL,canvasFactory=()=>document.createElement('canvas'),onStage=()=>{}}={}){
+export async function prepareImageForOcr(blob,{signal,maxDimension=MAX_OCR_DIMENSION,previewMaxDimension=PREVIEW_MAX_DIMENSION,urlApi=globalThis.URL,canvasFactory=()=>document.createElement('canvas'),onStage=()=>{},variant='color'}={}){
  if(!blob||typeof blob.arrayBuffer!=='function'||!String(blob.type||'').startsWith('image/'))throw new TypeError('Se necesita una fotografía válida para analizar.');
  if(!blob.size)throw new TypeError('La fotografía está vacía.');
  throwIfAborted(signal);onStage('Preparando imagen');
@@ -25,10 +25,15 @@ export async function prepareImageForOcr(blob,{signal,maxDimension=MAX_OCR_DIMEN
  try{
   const sourceWidth=decoded.image.width||decoded.image.naturalWidth,sourceHeight=decoded.image.height||decoded.image.naturalHeight;
   if(!sourceWidth||!sourceHeight)throw new Error('No se pudieron leer las dimensiones de la fotografía.');
-  const scale=Math.min(1,maxDimension/Math.max(sourceWidth,sourceHeight));const width=Math.max(1,Math.round(sourceWidth*scale)),height=Math.max(1,Math.round(sourceHeight*scale));
+  const scale=variant==='grayscale'?Math.min(1.5,maxDimension/Math.max(sourceWidth,sourceHeight)):Math.min(1,maxDimension/Math.max(sourceWidth,sourceHeight));const width=Math.max(1,Math.round(sourceWidth*scale)),height=Math.max(1,Math.round(sourceHeight*scale));
   canvas=canvasFactory();canvas.width=width;canvas.height=height;const context=canvas.getContext('2d',{alpha:false});if(!context)throw new Error('No se pudo procesar la fotografía en este dispositivo.');
   // ImageBitmap with imageOrientation=from-image (or browser-decoded <img> fallback) normalizes EXIF exactly once.
   context.drawImage(decoded.image,0,0,width,height);
+  if(variant==='grayscale'){
+   const pixels=context.getImageData(0,0,width,height),data=pixels.data;
+   for(let index=0;index<data.length;index+=4){const luminance=.2126*data[index]+.7152*data[index+1]+.0722*data[index+2],contrasted=Math.max(0,Math.min(255,(luminance-128)*1.22+128));data[index]=data[index+1]=data[index+2]=contrasted;}
+   context.putImageData(pixels,0,0);
+  }
   throwIfAborted(signal);onStage('Imagen preparada');const processedBlob=await canvasToBlob(canvas,'image/jpeg',0.96);throwIfAborted(signal);
   const previewScale=Math.min(1,previewMaxDimension/Math.max(width,height));const previewWidth=Math.max(1,Math.round(width*previewScale)),previewHeight=Math.max(1,Math.round(height*previewScale));
   previewCanvas=canvasFactory();previewCanvas.width=previewWidth;previewCanvas.height=previewHeight;const previewContext=previewCanvas.getContext('2d',{alpha:false});if(!previewContext)throw new Error('No se pudo crear la vista comparativa.');

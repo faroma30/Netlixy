@@ -448,3 +448,14 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 La seguridad queda como WPA/WPA2 asumida cuando no aparece indicada; operador permanece desconocido/no identificado.
 - 🟡 Repetir OCR físico en iPhone con la fotografía original pendiente; sin la imagen no se ha verificado la salida real de Tesseract.
 - 🟢 `APP_VERSION` actualizado a `V1.16.1`; Service Worker a `wifi-connect-v1.16.1`, conservando la limpieza de cachés antiguas.
+
+## Optimización OCR — validación física Huawei (2026-10-07)
+
+- 🟢 Pase color real recupera la contraseña Wi-Fi correcta mediante `WLAN Key`, pese al ruido antes de la etiqueta.
+- 🟢 Pase color conserva SSID2 correctamente; pase alternativo en gris/contraste encuentra SSID1 como candidato incierto y el selector indica `Revisa este dato`.
+- 🟢 La credencial administrativa leída parcialmente por el segundo pase se excluye usando el contexto cercano de usuario/IP de gestión; contraseña genérica tiene menor prioridad que etiquetas Wi-Fi explícitas.
+- 🟢 Fusión conserva líneas/candidatos con origen, texto y confianza por pase; el pase gris/contraste solo corre cuando el primero es débil o incompleto.
+- 🟡 SSID1 todavía no se reconoce exactamente como está impreso; no se reconstruye por similitud y requiere revisión/corrección humana.
+- 🟡 OCR + parser end-to-end deja usable la red de 5 GHz y la contraseña, pero el SSID de 2.4 GHz aún necesita revisión humana.
+- ⚪ Recorte central experimental descartado: bajó la confianza y perdió SSID1; no se codifican coordenadas de esta etiqueta en producción.
+- 🟢 `APP_VERSION` actualizado a `V1.16.2`; Service Worker a `wifi-connect-v1.16.2`, conservando limpieza de cachés antiguas.
