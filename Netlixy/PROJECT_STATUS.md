@@ -533,6 +533,8 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 Causa del recorte: Ajustes ocupaba una sola pista estrecha de una cuadrícula de diez columnas; su etiqueta excedía el ancho asignado en móviles.
 - 🟢 Barra móvil redistribuida con pistas más amplias, zona de Ajustes extendida y controles con área táctil mínima de 44×44 px.
 - 🟢 Escanear continúa anclado a `left: 50%` y `translateX(-50%)`, separado de las pistas laterales y respetando la safe area existente.
-- 🟡 Capturas y medición en navegador de 375×812, 390×844, 393×852 y 430×932 pendientes de verificación con la versión publicada.
+- 🟢 Capturas de producción en 375×812, 390×844, 393×852 y 430×932: los cuatro accesos se ven completos y el escáner permanece centrado mediante `left: 50%` y `translateX(-50%)`.
+- 🟢 Inicio, Redes, Ajustes y apertura de la pantalla Escanear respondieron a clic en el navegador.
+- 🟡 El navegador in-app no expone rectángulos DOM para medición directa; el centro se comprobó con la regla CSS y las capturas de cada viewport.
 - 🟡 Validación física iPhone pendiente.
 - 🟢 `APP_VERSION` actualizado a `V1.21.5`; Service Worker a `wifi-connect-v1.21.5`, con limpieza de cachés antiguas.
