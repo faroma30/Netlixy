@@ -33,7 +33,7 @@ assert.match(home,/Promise\.all\(\[storage\.listRecentNetworks\(\),storage\.list
 assert.match(home,/data-network-tab="recent" data-go="recent"[\s\S]*data-network-tab="saved" data-go="recent"/,'home cards carry explicit destinations for both network tabs');
 assert.match(app,/if\(goButton\.dataset\.networkTab\)\{networkTab=goButton\.dataset\.networkTab;route='recent';/,'home action click forces Redes with its selected tab');
 const clickHandler=app.slice(app.indexOf("root.addEventListener('click'"),app.indexOf("document.querySelector('.bottom-nav')"));assert.ok(clickHandler.indexOf("const goButton=e.target.closest('[data-go]')")<clickHandler.indexOf("const tab=e.target.closest('[data-network-tab]')"),'home cards with both attributes resolve navigation before the tab-only handler');assert.match(clickHandler,/if\(tab\)\{networkTab=tab\.dataset\.networkTab;route='recent';render\(\);return;\}/,'network tab controls also ensure the Redes route is active');
-assert.match(app,/if\(open\)\{detailReturnRoute='recent'/,'opening a network from the list records a return destination');
+assert.match(app,/if\(open\)\{detailReturnRoute=open\.dataset\.detailReturn==='home'\?'home':'recent'/,'opening a home recent preview returns to Home');
 assert.match(app,/if\(action==='detected-home'\)\{route=detailReturnRoute==='recent'\?'recent':'home'/,'back from network detail returns to its originating list');
 assert.match(app,/data-action="validation-scan-clear"/);assert.match(app,/sessionStorage\.removeItem\('wifi-connect-scan-diagnostics'\)/,'validation can clear session-only scan diagnostics');
 const safeSnapshots=[];const sensitiveSsid='Private SSID 932',sensitivePassword='PrivatePassword932';

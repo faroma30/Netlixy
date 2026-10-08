@@ -509,3 +509,12 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - ⚪ Diagnóstico desde Android; los 23 pasos específicos quedan disponibles en el checklist de validación.
 
 - 🟢 `APP_VERSION` actualizado a `V1.20.0`; Service Worker a `wifi-connect-v1.20.0`, conservando la limpieza de cachés antiguas.
+
+## Rediseño visual definitivo — referencia `Estilo.png` (2026-10-08)
+
+- 🟢 `Estilo.png` se conserva dentro del proyecto y queda documentada como referencia visual oficial de WiFi Connect.
+- 🟢 Inicio tiene una acción principal Generar QR, contadores dinámicos basados en las listas IndexedDB y una vista compacta de hasta tres Recientes con acceso a su detalle.
+- 🟢 Elección de banda, Red lista, Redes, formulario QR, QR generado, Ajustes, cámara, revisión, errores, validación y laboratorio usan el mismo sistema oscuro azul/cian.
+- 🟢 Barra inferior con cuatro destinos reales, acción de escáner centrada geométricamente y safe area; se conserva el flujo de navegación.
+- 🟡 Comparación visual publicada y pruebas físicas en iPhone/Android pendientes de repetir con esta entrega.
+- 🟢 `APP_VERSION` actualizado a `V1.21.0`; Service Worker a `wifi-connect-v1.21.0`, con limpieza de cachés anteriores y el nuevo CSS incluido en la app shell.
