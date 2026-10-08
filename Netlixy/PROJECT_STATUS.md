@@ -517,4 +517,4 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 Elección de banda, Red lista, Redes, formulario QR, QR generado, Ajustes, cámara, revisión, errores, validación y laboratorio usan el mismo sistema oscuro azul/cian.
 - 🟢 Barra inferior con cuatro destinos reales, acción de escáner centrada geométricamente y safe area; se conserva el flujo de navegación.
 - 🟡 Comparación visual publicada y pruebas físicas en iPhone/Android pendientes de repetir con esta entrega.
-- 🟢 `APP_VERSION` actualizado a `V1.21.0`; Service Worker a `wifi-connect-v1.21.0`, con limpieza de cachés anteriores y el nuevo CSS incluido en la app shell.
+- 🟢 margen heredado de la barra inferior corregido para mantener el botón del escáner centrado en el viewport. `APP_VERSION` actualizado a `V1.21.1`; Service Worker a `wifi-connect-v1.21.1`, con limpieza de cachés anteriores y el nuevo CSS incluido en la app shell.
