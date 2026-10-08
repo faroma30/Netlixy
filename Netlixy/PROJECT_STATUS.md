@@ -526,4 +526,4 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 La barra inferior separa mejor Inicio, Redes y Ajustes; el botón Escanear mantiene el centro geométrico del viewport.
 - 🟡 Revisión visual de producción en tamaños de navegador completada; la captura de iPhone mencionada no estaba adjunta en esta solicitud, por lo que no se declara comparación física lado a lado.
 - 🟡 Pendiente repetir comprobación física en iPhone.
-- 🟢 `APP_VERSION` actualizado a `V1.21.3`; Service Worker a `wifi-connect-v1.21.3`, conservando la limpieza de cachés antiguas.
+- 🟢 `APP_VERSION` actualizado a `V1.21.4`; Service Worker a `wifi-connect-v1.21.4`, conservando la limpieza de cachés antiguas.
