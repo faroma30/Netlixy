@@ -518,3 +518,12 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 Barra inferior con cuatro destinos reales, acción de escáner centrada geométricamente y safe area; se conserva el flujo de navegación.
 - 🟡 Comparación visual publicada y pruebas físicas en iPhone/Android pendientes de repetir con esta entrega.
 - 🟢 margen heredado de la barra inferior corregido para mantener el botón del escáner centrado en el viewport. `APP_VERSION` actualizado a `V1.21.2`; Service Worker a `wifi-connect-v1.21.2`, con limpieza de cachés anteriores y el nuevo CSS incluido en la app shell.
+
+## Corrección visual estricta de Inicio — referencia `Estilo.png` (2026-10-08)
+
+- 🟢 Inicio se ajusta a la composición aprobada: cabecera más compacta, Generar QR luminoso, tarjetas verticales de Recientes/Guardadas con contadores consultados en IndexedDB.
+- 🟢 Se añadieron ondas ambientales ligeras solo al fondo de Inicio; filas recientes y estado vacío conservan datos reales y acciones existentes.
+- 🟢 La barra inferior separa mejor Inicio, Redes y Ajustes; el botón Escanear mantiene el centro geométrico del viewport.
+- 🟡 Revisión visual de producción en tamaños de navegador completada; la captura de iPhone mencionada no estaba adjunta en esta solicitud, por lo que no se declara comparación física lado a lado.
+- 🟡 Pendiente repetir comprobación física en iPhone.
+- 🟢 `APP_VERSION` actualizado a `V1.21.3`; Service Worker a `wifi-connect-v1.21.3`, conservando la limpieza de cachés antiguas.
