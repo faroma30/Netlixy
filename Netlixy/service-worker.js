@@ -1,4 +1,4 @@
-const CACHE_NAME='wifi-connect-v1.21.4';
+const CACHE_NAME='wifi-connect-v1.21.5';
 // Refresh the versioned app shell for the final home backdrop and navigation alignment.
 // Large OCR assets stay lazy: the existing same-origin runtime cache stores them on first fetch, not at app startup.
 const OCR_LAZY_ASSETS=['./src/ocr.js','./src/image-processing.js','./vendor/tesseract/tesseract.esm.min.js','./vendor/tesseract/core/worker.min.js','./vendor/tesseract/core/tesseract-core-lstm.wasm.js','./vendor/tesseract/core/tesseract-core-lstm.wasm','./vendor/tesseract/core/tesseract-core-simd-lstm.wasm.js','./vendor/tesseract/core/tesseract-core-simd-lstm.wasm','./vendor/tesseract/core/tesseract-core-relaxedsimd-lstm.wasm.js','./vendor/tesseract/core/tesseract-core-relaxedsimd-lstm.wasm','./vendor/tesseract/lang/eng.traineddata.gz','./vendor/tesseract/lang/spa.traineddata.gz'];

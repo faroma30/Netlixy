@@ -527,3 +527,12 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟡 Revisión visual de producción en tamaños de navegador completada; la captura de iPhone mencionada no estaba adjunta en esta solicitud, por lo que no se declara comparación física lado a lado.
 - 🟡 Pendiente repetir comprobación física en iPhone.
 - 🟢 `APP_VERSION` actualizado a `V1.21.4`; Service Worker a `wifi-connect-v1.21.4`, conservando la limpieza de cachés antiguas.
+
+## Corrección final de barra inferior — V1.21.5 (2026-10-08)
+
+- 🟢 Causa del recorte: Ajustes ocupaba una sola pista estrecha de una cuadrícula de diez columnas; su etiqueta excedía el ancho asignado en móviles.
+- 🟢 Barra móvil redistribuida con pistas más amplias, zona de Ajustes extendida y controles con área táctil mínima de 44×44 px.
+- 🟢 Escanear continúa anclado a `left: 50%` y `translateX(-50%)`, separado de las pistas laterales y respetando la safe area existente.
+- 🟡 Capturas y medición en navegador de 375×812, 390×844, 393×852 y 430×932 pendientes de verificación con la versión publicada.
+- 🟡 Validación física iPhone pendiente.
+- 🟢 `APP_VERSION` actualizado a `V1.21.5`; Service Worker a `wifi-connect-v1.21.5`, con limpieza de cachés antiguas.

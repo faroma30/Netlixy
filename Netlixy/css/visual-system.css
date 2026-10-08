@@ -475,18 +475,20 @@ body {
 }
 .home-network-icon { color: #a8e7ff; filter: drop-shadow(0 0 6px #13bdff55); }
 .home-empty { min-height: 54px; padding: 10px 12px; }
-.bottom-nav { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+.bottom-nav { grid-template-columns: repeat(12, minmax(0, 1fr)); }
 .bottom-nav [data-tab="home"],
 .bottom-nav [data-tab="recent"],
 .bottom-nav [data-tab="settings"] {
   position: relative;
   top: auto;
-  width: auto;
   transform: none;
+  justify-self: center;
+  min-width: 44px;
+  min-height: 52px;
 }
-.bottom-nav [data-tab="home"] { grid-column: 2; }
-.bottom-nav [data-tab="recent"] { grid-column: 4; }
-.bottom-nav [data-tab="settings"] { grid-column: 9; }
+.bottom-nav [data-tab="home"] { grid-column: 2; width: 44px; }
+.bottom-nav [data-tab="recent"] { grid-column: 4; width: 44px; }
+.bottom-nav [data-tab="settings"] { grid-column: 9 / span 3; width: 100%; max-width: 76px; }
 
 @media (max-width: 380px) {
   .home-brand { min-height: 96px; }
@@ -495,7 +497,7 @@ body {
   .home-action-grid .action-card:nth-child(2) { min-height: 106px; }
   .bottom-nav [data-tab="home"] { grid-column: 2; }
   .bottom-nav [data-tab="recent"] { grid-column: 4; }
-  .bottom-nav [data-tab="settings"] { grid-column: 9; }
+  .bottom-nav [data-tab="settings"] { grid-column: 9 / span 3; }
 }
 @media (min-width: 650px) {
   body { padding: 0; }
