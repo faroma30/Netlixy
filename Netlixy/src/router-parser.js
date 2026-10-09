@@ -116,6 +116,37 @@ function addCandidate(list, value, score, reason, sourceLine, kind) {
   }
   list.push(candidate);
 }
+function editDistanceAtMostTwo(left,right){
+ const a=String(left||''),b=String(right||'');if(a===b)return 0;if(Math.abs(a.length-b.length)>2)return 3;
+ let previous=Array.from({length:b.length+1},(_,index)=>index);
+ for(let row=1;row<=a.length;row++){const current=[row];let min=row;for(let col=1;col<=b.length;col++){const value=Math.min(current[col-1]+1,previous[col]+1,previous[col-1]+(a[row-1]===b[col-1]?0:1));current.push(value);min=Math.min(min,value);}if(min>2)return 3;previous=current;}
+ return previous[b.length];
+}
+function compareCredentialAcrossPasses(candidate,field,passes){
+ if(!passes.length||candidate?.source?.startsWith('qr'))return;
+ let exactPassCount=0,mismatchedPassCount=0,missingPassCount=0;
+ for(const pass of passes){
+  const passText=String(pass.normalizedText||pass.rawText||'');
+  const passParsed=parseRouterLabel({rawText:pass.rawText??passText,normalizedText:passText,passes:[]});
+  const passCandidates=field==='ssid'?passParsed.ssidCandidates:passParsed.passwordCandidates;
+  const exact=passCandidates.some(item=>item.value===candidate.value);
+  if(exact){exactPassCount++;continue;}
+  const nearCandidate=passCandidates.some(item=>editDistanceAtMostTwo(item.value,candidate.value)<=2);
+  // SSIDs can be present as unlabelled lines and missed by a parser pass (for example when
+  // OCR adds punctuation or replaces an underscore with a space). Nearness is only evidence
+  // of uncertainty; it never rewrites the detected value.
+  const nearSsidLine=field==='ssid'&&passText.split(/\r?\n/).some(line=>{
+   const value=line.trim();if(value.length<4||value.length>64||/\b(?:ssid|contrasenya|password|clave|wpa|mac|serial|username|admin|wps)\b/i.test(value))return false;
+   const candidateLike=/[\p{L}\p{N}]/u.test(value)&&/[\p{L}\p{N}_-]/u.test(value);
+   const compared=value.replace(/^[^\p{L}\p{N}]+/u,'');
+   return candidateLike&&compared!==candidate.value&&editDistanceAtMostTwo(compared,candidate.value)<=2;
+  });
+  if(nearCandidate||nearSsidLine)mismatchedPassCount++;else missingPassCount++;
+ }
+ const exactAgreement=passes.length>=2&&exactPassCount===passes.length;
+ candidate.ocrVerification={passCount:passes.length,exactPassCount,mismatchedPassCount,missingPassCount,exactAgreement};
+ if(!exactAgreement)candidate.needsReview=true;
+}
 const stopLine = line => {
   const { label } = splitLabel(line);
   return Boolean(findLabel(label, SSID_LABELS) || findLabel(label, PASSWORD_LABELS) || /^(?:security|encryption|wpa[23]?|wep|mac(?: address)?|wps(?: pin)?|s\/?n|sn|serial(?: number)?|pin|ip|gateway|username)$/i.test(normalizeLabel(label)));
@@ -249,6 +280,10 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
   const password = passwordCandidates[0] ? { ...passwordCandidates[0], confidence: Math.min(1, passwordCandidates[0].score / 100) } : null;
   const warnings = [];
   const passRecords=Array.isArray(input?.passes)?input.passes:[];
+  for(const candidate of ssidCandidates)compareCredentialAcrossPasses(candidate,'ssid',passRecords);
+  for(const candidate of passwordCandidates)compareCredentialAcrossPasses(candidate,'password',passRecords);
+  if(ssidCandidates.some(candidate=>candidate.ocrVerification&&!candidate.ocrVerification.exactAgreement))warnings.push('El SSID no coincide exactamente entre pases OCR; requiere revisión.');
+  if(passwordCandidates.some(candidate=>candidate.ocrVerification&&!candidate.ocrVerification.exactAgreement))warnings.push('La contraseña no coincide exactamente entre pases OCR; requiere revisión.');
   for(const candidate of [...ssidCandidates,...passwordCandidates]){
     const sources=passRecords.filter(pass=>String(pass.normalizedText||'').split(/\r?\n/).some(source=>source.trim()===candidate.sourceLine)).map(pass=>({pass:pass.id,text:candidate.sourceLine,score:Number.isFinite(pass.confidence)?pass.confidence:null}));
     if(sources.length){candidate.sourcePasses=sources;candidate.ocrScore=Math.max(...sources.map(item=>item.score??0));candidate.sourceText=candidate.sourceLine;if(candidate.ocrScore<72)candidate.needsReview=true;}

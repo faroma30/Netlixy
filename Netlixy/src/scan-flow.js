@@ -13,8 +13,10 @@ export function buildScanPlan(parsed,{selectedCandidate=null}={}){
  const highConfidenceTaggedOcr=taggedOcrCandidate(primary,'ssid')||primary?.corrected&&primary.correctionConfidence==='high'&&Number(primary.correctionScore)>=7;
  const highConfidencePassword=taggedOcrCandidate(parsed?.password,'password');
  const trustedProposal=primary.corrected&&primary.correctionConfidence==='high'&&Number(primary.correctionScore)>=7;
- const ssidNeedsReview=Boolean(ssidConflict||primary.needsReview&&!primary.qrAgreement&&!qrTrusted(primary)&&!highConfidenceTaggedOcr&&!trustedProposal);
- const passwordNeedsReview=parsed?.security?.value!=='Sin contraseña'&&(!parsed?.password||passwordConflict||parsed.password.needsReview&&!parsed.password.qrAgreement&&!qrTrusted(parsed.password)&&!highConfidencePassword);
+ const ssidUnverified=Boolean(primary.ocrVerification&&!primary.ocrVerification.exactAgreement&&!qrTrusted(primary));
+ const passwordUnverified=Boolean(parsed?.password?.ocrVerification&&!parsed.password.ocrVerification.exactAgreement&&!qrTrusted(parsed.password));
+ const ssidNeedsReview=Boolean(ssidConflict||ssidUnverified||primary.needsReview&&!primary.qrAgreement&&!qrTrusted(primary)&&!highConfidenceTaggedOcr&&!trustedProposal);
+ const passwordNeedsReview=parsed?.security?.value!=='Sin contraseña'&&(!parsed?.password||passwordConflict||passwordUnverified||parsed.password.needsReview&&!parsed.password.qrAgreement&&!qrTrusted(parsed.password)&&!highConfidencePassword);
  const fields=[...(ssidNeedsReview?['ssid']:[]),...(passwordNeedsReview?['password']:[])];
  if(fields.length)return {state:'review',choices:[primary],candidate:primary,fields};
  return {state:'ready',choices:[primary],candidate:primary,fields:[]};

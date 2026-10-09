@@ -1,5 +1,5 @@
 import {isValidationAccessAllowed} from './config.js';
-export const APP_VERSION='V1.21.9';
+export const APP_VERSION='V1.21.10';
 export const VALIDATION_SECTIONS=[
  {id:'safari',title:'Safari',tests:['Abrir aplicación en Safari','Navegación Inicio / Recientes / Ajustes','Generar QR manual','Guardar red','Añadir nota','Editar nota','Cerrar Safari y volver a abrir','Persistencia IndexedDB']},
  {id:'camera',title:'Cámara',tests:['Solicitar permiso','Cámara trasera','Preview correcta','Capturar fotografía','Repetir fotografía','Confirmar fotografía','Abandonar pantalla detiene cámara']},

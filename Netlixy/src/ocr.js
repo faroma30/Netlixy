@@ -40,7 +40,10 @@ export function createOcrService({loadEngine=()=>import('../vendor/tesseract/tes
    const hasBandLabels=expectedBands.size>0;
    const qrPasswordDisagrees=qrCoversWifi&&Boolean(qrResult.password)&&hasPasswordCandidate&&!firstMatchesQrPassword;
    const qrCanSkipAlternate=hasPasswordCandidate&&qrCoversWifi&&firstMatchesQr&&firstMatchesQrPassword&&!hasBandLabels;
-   const weak=!qrCanSkipAlternate&&(firstConfidence===null||firstConfidence<72||!initialParse.ssidCandidates.some(candidate=>candidate.score>=60)||!hasPasswordCandidate||missingExpectedBand||qrPasswordDisagrees);
+   // OCR page confidence cannot verify exact credential characters. If OCR (rather than a valid
+   // Wi-Fi QR) is the source of any usable credential, always run the independent grayscale pass.
+   const needsCredentialCorroboration=!qrCoversWifi&&(Boolean(initialParse.ssidCandidates.some(candidate=>candidate.score>=40))||hasPasswordCandidate);
+   const weak=!qrCanSkipAlternate&&(firstConfidence===null||firstConfidence<72||!initialParse.ssidCandidates.some(candidate=>candidate.score>=60)||!hasPasswordCandidate||missingExpectedBand||qrPasswordDisagrees||needsCredentialCorroboration);
    if(weak){
     throwIfAborted(signal);onStage('Mejorando lectura');const alternateStarted=performance.now();
     try{

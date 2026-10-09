@@ -5,7 +5,7 @@ import {pasteClipboardText} from './clipboard.js';
 import {validateNetwork,makeId,formatDate,esc} from './utils.js';
 import {createCameraSession} from './camera.js';
 import {isLabMode,buildLabDiagnostic,buildLabText,characterDifferences} from './lab-diagnostics.js';
-import {APP_VERSION,VALIDATION_SECTIONS,VALIDATION_FAILURE_CATEGORIES,VALIDATION_STATUS,VALIDATION_STORAGE_KEY,isValidationMode,createChecklist,loadChecklist,saveChecklist,updateChecklistEntry,collectCapabilities,createValidationExport,createReadableReport} from './validation.js?v=1.21.9';
+import {APP_VERSION,VALIDATION_SECTIONS,VALIDATION_FAILURE_CATEGORIES,VALIDATION_STATUS,VALIDATION_STORAGE_KEY,isValidationMode,createChecklist,loadChecklist,saveChecklist,updateChecklistEntry,collectCapabilities,createValidationExport,createReadableReport} from './validation.js?v=1.21.10';
 import {formatRecentExpiry} from './network-lifecycle.js';
 import {analyzeRouterImage} from './router-image-analysis.js';
 import {buildScanPlan,createScannedNetwork,persistRecentBeforeReady} from './scan-flow.js';

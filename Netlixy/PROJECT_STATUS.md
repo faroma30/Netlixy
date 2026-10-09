@@ -548,3 +548,13 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 Diagnósticos conservan etapa, pases y motivos sanitizados de OCR/parser sin SSID ni contraseñas en los informes compartibles.
 - 🟡 Repetición física de Vera en iPhone pendiente; no se marca como validada en dispositivo físico.
 - 🟢 `APP_VERSION` actualizado a `V1.21.9`; Service Worker a `wifi-connect-v1.21.9`, conservando limpieza de cachés antiguas.
+
+## Precisión exacta OCR — Vera (2026-10-09)
+
+- 🟢 La foto Vera original produce SSID y contraseña exactamente iguales a las expectativas locales en OCR A; la seguridad WPA se detecta explícitamente y no se inventa banda.
+- 🟢 OCR B se ejecuta también cuando la confianza global parece alta. Solo se considera verificado un valor OCR si A y B coinciden exactamente; una discrepancia o campo ausente pide confirmar únicamente ese campo.
+- 🟢 Una discrepancia bloquea el guardado en Recientes hasta la confirmación humana; después se conserva el flujo existente de Reciente 48 h y Red lista.
+- 🟢 Pruebas de recorte genérico, ampliación 2×/3× y PSM sobre la región detectada no mejoraron los caracteres y se descartaron.
+- 🟢 E2E local real: Vera exacta con SSID sujeto a revisión por diferencia entre pases; contraseña corroborada. Huawei mantiene candidatos 2.4/5 GHz y excluye la clave administrativa. Orange mantiene QR/OCR coincidentes y red lista.
+- 🟡 Repetición física Vera en iPhone pendiente; la precisión en la fotografía local y JPEG emulado no sustituye la comprobación física.
+- 🟢 `APP_VERSION` actualizado a `V1.21.10`; Service Worker a `wifi-connect-v1.21.10`, con limpieza de cachés antiguas.
