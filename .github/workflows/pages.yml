@@ -28,8 +28,8 @@ jobs:
           mkdir -p Netlixy/dist
           cp Netlixy/index.html Netlixy/manifest.webmanifest Netlixy/service-worker.js Netlixy/dist/
           cp -R Netlixy/css Netlixy/src Netlixy/assets Netlixy/vendor Netlixy/dist/
-      - uses: actions/upload-pages-artifact@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: Netlixy/dist
       - id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@v4
