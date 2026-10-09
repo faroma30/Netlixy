@@ -4,6 +4,7 @@ import Tesseract from 'tesseract.js';
 import {fileURLToPath} from 'node:url';
 import {analyzeRealFixtureText,summarizeRealFixtures} from '../src/real-fixture-analysis.js';
 import {parseRouterLabel} from '../src/router-parser.js';
+import {buildScanPlan,createScannedNetwork} from '../src/scan-flow.js';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
 const fixtureRoot=path.join(root,'fixtures/operators-real');
@@ -28,7 +29,7 @@ else {
   }
   if(!text){console.error(`No se encontró imagen local ni ocr.local.txt para ${sample.id}.`);process.exitCode=2;}
   else {
-   const report=analyzeRealFixtureText(text,expected);const g=report.generic,p=report.profiled,parsed=parseRouterLabel({rawText:text,normalizedText:text});
+   const report=analyzeRealFixtureText(text,expected);const g=report.generic,p=report.profiled,parsed=parseRouterLabel({rawText:text,normalizedText:text}),plan=buildScanPlan(parsed),network=createScannedNetwork(parsed,plan.candidate);
    console.log(`MUESTRA ${sample.id} · operador esperado ${expected.operator||'—'} · OCR local spa+eng / fuente ${imagePath?'imagen':'texto OCR guardado'}`);
    if(durationMs!==null)console.log(`PASE OCR directo AUTO: ${durationMs} ms · confianza ${Number.isFinite(confidence)?confidence.toFixed(1)+'%':'—'}`);
    const relevant=text.split(/\r?\n/).filter(line=>/SSID|WLAN\s*K/i.test(line));if(relevant.length)console.log(`LÍNEAS OCR WIFI: ${relevant.join(' | ')}`);
@@ -36,6 +37,7 @@ else {
    console.log(`GENÉRICO: SSID ${yn(g.matches.ssid)} score ${safeTop(g.top.ssid).score??'—'} · contraseña ${yn(g.matches.password)} score ${safeTop(g.top.password).score??'—'} · seguridad ${yn(g.matches.security)} · operador ${yn(g.matches.operator)}`);
    console.log(`PERFILES: operador ${p.top.operator?.id||'no identificado'} · SSID ${yn(p.matches.ssid)} score ${safeTop(p.top.ssid).score??'—'} · contraseña ${yn(p.matches.password)} score ${safeTop(p.top.password).score??'—'} · seguridad ${yn(p.matches.security)}`);
    console.log(`DIFERENCIAS: SSID elegido cambió ${report.differences.ssidValueChanged?'sí':'no'}; contraseña elegida cambió ${report.differences.passwordValueChanged?'sí':'no'}; Δscore SSID ${report.differences.ssidScoreDelta}; Δscore contraseña ${report.differences.passwordScoreDelta}.`);
+   console.log(`FLUJO SEGURO: origen SSID ${parsed.ssid?.sourceLabel||'no disponible'} · tipo SSID ${parsed.ssid?.fieldType||'ninguno'} · SSID exacto esperado ${parsed.ssid?.value===expected.ssid?'sí':'no'} · origen clave ${parsed.password?.sourceLabel||'no disponible'} · clave exacta esperada ${parsed.password?.value===expected.password?'sí':'no'} · plan ${plan.state}${plan.fields?.length?` (${plan.fields.join(',')})`:''} · SSID Red lista igual a clave ${Boolean(network.ssid&&network.ssid===network.password)?'sí':'no'}`);
    if(showValues)console.log('VALORES (sensibles):',JSON.stringify({generic:{ssid:g.top.ssid?.value,password:g.top.password?.value},profiled:{ssid:p.top.ssid?.value,password:p.top.password?.value},expected:{ssid:expected.ssid,password:expected.password}},null,2));
   }
  }

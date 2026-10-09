@@ -558,3 +558,13 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟢 E2E local real: Vera exacta con SSID sujeto a revisión por diferencia entre pases; contraseña corroborada. Huawei mantiene candidatos 2.4/5 GHz y excluye la clave administrativa. Orange mantiene QR/OCR coincidentes y red lista.
 - 🟡 Repetición física Vera en iPhone pendiente; la precisión en la fotografía local y JPEG emulado no sustituye la comprobación física.
 - 🟢 `APP_VERSION` actualizado a `V1.21.10`; Service Worker a `wifi-connect-v1.21.10`, con limpieza de cachés antiguas.
+
+## Corrección de contaminación SSID/contraseña — V1.21.11 (2026-10-09)
+
+- 🟢 Causa reproducida en OCR real spa+eng: Tesseract omitió la etiqueta SSID y leyó el nombre sin su separador; además, la línea del valor de contraseña podía entrar como candidato SSID débil. `buildScanPlan()` permitía caer al `parsed.ssid` débil cuando no quedaba un SSID con score suficiente, y `createScannedNetwork()` no comprobaba el tipo/procedencia del candidato.
+- 🟢 El valor después de una etiqueta de contraseña queda excluido del conjunto SSID. Se reconoce de forma conservadora un nombre plausible inmediatamente antes de una etiqueta Wi-Fi, con procedencia contextual y revisión obligatoria; no se transforman caracteres OCR.
+- 🟢 `buildScanPlan()` y `createScannedNetwork()` solo aceptan candidatos tipados/procedentes como SSID o contraseña. Si falta SSID pero hay clave, la pantalla solicita únicamente “Nombre de red” y preserva la clave; no crea Reciente hasta confirmar.
+- 🟢 Diagnóstico local añade `ssidSource`, `passwordSource` y `crossFieldContaminationDetected`, sin valores de credenciales.
+- 🟢 Regresiones cubren campos independientes con valor igual, contaminación con mismo origen, SSID ausente, candidato con forma de contraseña, Orange QR/OCR y selección de bandas Huawei.
+- 🟡 Repetición física Vera en iPhone pendiente.
+- 🟢 `APP_VERSION` actualizado a `V1.21.11`; Service Worker a `wifi-connect-v1.21.11`, manteniendo limpieza de cachés antiguas.
