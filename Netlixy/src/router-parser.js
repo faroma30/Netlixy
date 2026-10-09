@@ -5,12 +5,15 @@ const SSID_LABELS = [
   [/^(?:ssid|ss[i1l]d)(?:\s*(?:[12]|[il])|\s+(?:2[.,]?4\s*(?:ghz|g)?|5\s*(?:ghz|g)?))?$/, 100, 'Etiqueta SSID'],
   [/^(?:red\s+)?wi[ -]?f[i1l](?:\s+red)?$/, 100, 'Etiqueta RED Wi-Fi'],
   [/^nombre\s+(?:de\s+)?wi[ -]?f[i1l]$/, 100, 'Etiqueta Nombre Wi-Fi'],
+  [/^(?:nom\s+(?:de\s+)?(?:xarxa|wi[ -]?f[i1l])|xarxa\s+wi[ -]?f[i1l])$/, 100, 'Etiqueta catalana de nombre de red'],
   [/^(?:wi[ -]?fi|wlan)\s*(?:name|nombre)$/, 92, 'Etiqueta de nombre Wi-Fi'],
   [/^(?:wi[ -]?fi|wlan)$/, 78, 'Etiqueta Wi-Fi/WLAN'],
   [/^(?:wireless|network)\s+name$/, 88, 'Etiqueta de nombre de red'],
   [/^(?:nombre\s+(?:de\s+)?(?:wi[ -]?fi|red)|red\s+(?:wi[ -]?fi|wlan))$/, 90, 'Etiqueta de nombre de red']
 ];
 const PASSWORD_LABELS = [
+  [/^(?:contrase[nñ][yvi]a\s+(?:wpa[23]?|wi[ -]?f[i1l]|de\s+xarxa)|clau\s+(?:(?:de\s+)?(?:wi[ -]?f[i1l]|xarxa)))$/, 100, 'Etiqueta catalana de contraseña Wi-Fi'],
+  [/^contrasenya$/, 52, 'Etiqueta genérica catalana de contraseña'],
   [/^(?:clave|cl[vw]ave)\s+(?:de\s+)?wi[ -]?f[i1l]$/, 100, 'Etiqueta CLAVE Wi-Fi'],
   [/^(?:wi[ -]?fi|wlan)\s*(?:password|passvvord|passw[o0]rd|key|kev|kcy|clave|contrase[nñ]a)$/, 100, 'Etiqueta de contraseña Wi-Fi'],
   [/^(?:wpa\s*[- ]?psk|wpa[23]?\s*[- ]?(?:key|clave)|pre[ -]?shared\s+key|psk)$/, 98, 'Etiqueta de clave WPA/PSK'],
@@ -27,7 +30,7 @@ const isIpOrNumericPin = value => /^(?:\d{1,3}\.){3}\d{1,3}$/.test(value) || /^\
 const isSerialContext = label => /^(?:s\/?n|sn|serial(?:\s+number)?|serial number)$/i.test(label);
 const isAdminContext = (label, lines, index) => {
  if ((/\b(?:admin|administrator|web|router|login)\b/.test(label) && /\b(?:password|pass|key|credential|contrase[nñ]a|clave|pin)\b/.test(label)) || /^(?:admin|administrator|web|login)$/i.test(label)) return true;
- if (!/^(?:password|passvvord|passw[o0]rd|contrase[nñ]a|clave)$/i.test(label)) return false;
+ if (!/^(?:password|passvvord|passw[o0]rd|contrase[nñ]a|contrasenya|clave)$/i.test(label)) return false;
  const context=lines.slice(Math.max(0,index-4),index).join(' ');
  const userContext=/^(?:username|user name|user|login|account|usuario)\s*[:=]/i.test(lines[index-1]||'')||/\b(?:username|user\s*name|1semame|usename|root|admin|login)\b/i.test(context);
  const managementIp=/\bIP\b[^\n]{0,48}\b192[. ]+168[. ]+100[. ]+1\b/i.test(context);
@@ -166,7 +169,11 @@ export function parseRouterLabel(input = {}, {operatorProfiles: profilesEnabled 
 
     // Preserve plausible unlabelled SSID-like values as low-score diagnostic candidates.
     if (!ssidLabel && !passwordLabel && !value && /^[\p{L}\p{N}][\p{L}\p{N}_ .-]{2,63}$/u.test(line) && !stopLine(line) && !/\b(?:router|model|gateway|internet|security|encryption|wifi|wi-fi|wlan|ssid|password|serial|mac|pin)\b/i.test(line)) {
-      addCandidate(ssidCandidates, line, 22, 'Cadena plausible sin etiqueta', line, 'ssid');
+      const nextLines=lines.slice(index+1,index+3);
+      const adjacentWifiPassword=nextLines.some(nextLine=>{const {label:nextLabel}=splitLabel(nextLine);const match=findLabel(nextLabel,PASSWORD_LABELS);return Boolean(match&&/Wi-Fi|catalana|WPA/i.test(match[2]));});
+      const networkShaped=/[_-].*\d|\d.*[_-]/u.test(line);
+      if(adjacentWifiPassword&&networkShaped)addCandidate(ssidCandidates,line,78,'Nombre de red probable junto a etiqueta de contraseña Wi-Fi',line,'ssid');
+      else addCandidate(ssidCandidates, line, 22, 'Cadena plausible sin etiqueta', line, 'ssid');
     }
   });
 

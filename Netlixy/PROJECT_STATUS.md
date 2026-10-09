@@ -538,3 +538,13 @@ El repositorio previsto es `Netlixy` en la cuenta `faroma30`, indicada en la con
 - 🟡 El navegador in-app no expone rectángulos DOM para medición directa; el centro se comprobó con la regla CSS y las capturas de cada viewport.
 - 🟡 Validación física iPhone pendiente.
 - 🟢 `APP_VERSION` actualizado a `V1.21.5`; Service Worker a `wifi-connect-v1.21.5`, con limpieza de cachés antiguas.
+
+## Etiquetas catalanas — Vera real (2026-10-09)
+
+- 🟢 La fotografía local Vera se procesa con el mismo `analyzeRouterImage()` de cámara y galería, Tesseract `spa+eng`, preprocesado y parser; el OCR lee la red y `Contrasenya WPA`, con el valor en la línea siguiente.
+- 🟢 El parser reconoce etiquetas catalanas para nombre de red y contraseña, en la misma línea o en líneas separadas, con tolerancia limitada a confusiones OCR de etiqueta y sin editar el valor reconocido.
+- 🟢 Si falta el rótulo SSID en OCR, una cadena con forma de nombre de red junto a una etiqueta Wi-Fi explícita se propone por contexto; se mantiene sin banda inventada. La etiqueta WPA proporciona seguridad explícita.
+- 🟢 E2E local real: Vera llega a Red lista y se registra como Reciente antes de mostrarla; Huawei conserva 2.4/5 GHz y excluye credencial administrativa; Orange conserva QR/OCR coincidentes y no infiere banda.
+- 🟢 Diagnósticos conservan etapa, pases y motivos sanitizados de OCR/parser sin SSID ni contraseñas en los informes compartibles.
+- 🟡 Repetición física de Vera en iPhone pendiente; no se marca como validada en dispositivo físico.
+- 🟢 `APP_VERSION` actualizado a `V1.21.9`; Service Worker a `wifi-connect-v1.21.9`, conservando limpieza de cachés antiguas.

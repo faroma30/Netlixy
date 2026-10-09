@@ -23,6 +23,26 @@
       "securityCorrect": true
     },
     {
+      "id": "vera-real-001",
+      "operator": "unknown",
+      "manufacturer": "Vera",
+      "model": "unknown",
+      "source": "real-photo",
+      "status": "reviewed",
+      "ocrCorrect": true,
+      "operatorCorrect": true,
+      "ssidCorrect": true,
+      "passwordCorrect": true,
+      "securityCorrect": true,
+      "parserCorrect": true,
+      "manualCorrection": false,
+      "qrDecoded": false,
+      "qrMatchesOcr": false,
+      "bandInferred": false,
+      "failureCategories": [],
+      "notes": "La lectura local usa spa+eng; la etiqueta Contrasenya WPA queda separada del valor en la línea siguiente."
+    },
+    {
       "id": "orange-livebox6-real-001",
       "operator": "orange",
       "manufacturer": "Orange",

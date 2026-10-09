@@ -14,6 +14,16 @@ async function fixture(id){
 }
 async function run(){
  try{
+  const vera=await fixture('vera-real-001');assert(vera.blob.type==='image/jpeg','Vera debe ser JPEG');
+  const v=await analyzeRouterImage(vera.blob);assert(v.parsed.ssidCandidates.some(candidate=>candidate.value===vera.expected.ssid),'Vera real: SSID no recuperado desde la fotografía.');assert.equal(v.parsed.ssid.value,vera.expected.ssid,'Vera real: candidato SSID incorrecto seleccionado.');
+  assert(v.parsed.passwordCandidates.some(candidate=>candidate.value===vera.expected.password),'Vera real: contraseña no recuperada desde la fotografía.');assert.equal(v.parsed.password.value,vera.expected.password,'Vera real: candidato de contraseña incorrecto seleccionado.');
+  assert(v.parsed.security.value===vera.expected.security&&!v.parsed.security.inferred,'Vera real: WPA debe proceder de la etiqueta.');
+  assert(!v.parsed.ssidCandidates.some(candidate=>candidate.band),'Vera real: se inventó una banda Wi-Fi.');
+  assert.equal(v.qr.status,'not-found','Vera no debe depender de QR.');
+  assert.equal(buildScanPlan(v.parsed).state,'ready','Vera real: nombre y clave claros deben llegar directamente a Red lista.');
+  const veraOrder=[];await persistRecentBeforeReady({ssid:vera.expected.ssid},{saveRecent:async network=>{veraOrder.push('recent');return {...network,type:'recent'};},showReady:async network=>{assert.equal(network.type,'recent');veraOrder.push('ready');}});assert.deepEqual(veraOrder,['recent','ready'],'Vera debe crearse como Reciente antes de Red lista.');
+  log(`PASS Vera real · OCR ${v.ocr.confidence}% · pases ${v.ocr.passes.map(pass=>pass.id).join('+')} · SSID/clave recuperados · WPA explícita · sin QR/banda · ${v.durationMs} ms`);
+
   const huawei=await fixture('huawei-eg8145v5-real-001');assert(huawei.blob.type==='image/jpeg','Huawei debe ser JPEG');
   const h=await analyzeRouterImage(huawei.blob);const candidates=h.parsed.ssidCandidates;
   const band24=candidates.find(candidate=>candidate.band==='2.4 GHz'&&(candidate.proposedValue||candidate.value)===huawei.expected.ssid);
